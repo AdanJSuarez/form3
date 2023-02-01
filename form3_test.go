@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	urlTest = "https://api.fakeaddress/fake"
-	port    = 8080
+	urlTest = "https://api.fakeaddress/fake:8080"
 )
 
 var (
@@ -23,9 +22,9 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSForm3) BeforeTest(_, _ string) {
-	form3Test, err = New(urlTest, port)
+	form3Test, err = New(urlTest)
 }
 
-func (ts *TSForm3) TestValidPortAndURL() {
+func (ts *TSForm3) TestValidURL() {
 	ts.NoError(err)
 }

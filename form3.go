@@ -1,12 +1,27 @@
 package form3
 
-import "errors"
+import (
+	"errors"
+	"net/url"
+
+	"github.com/AdanJSuarez/form3/internal"
+)
 
 type Form3 struct {
-	URL  string
-	Port uint16
+	URL *url.URL
 }
 
-func New(URL string, Port uint16) (*Form3, error) {
-	return nil, errors.New("not implemented")
+// New returns a instance of Form3 client. Returns an error if the URL is wrong.
+func New(URL string) (*Form3, error) {
+	url, err := internal.NewValidation(URL)
+	if err != nil {
+		return nil, err
+	}
+
+	f3 := &Form3{URL: url}
+	return f3, nil
+}
+
+func Create() error {
+	return errors.New("not implemented")
 }
