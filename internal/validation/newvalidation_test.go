@@ -1,4 +1,4 @@
-package internal
+package validation
 
 import (
 	"testing"
@@ -16,10 +16,6 @@ type TSForm3 struct{ suite.Suite }
 
 func TestRunSuite(t *testing.T) {
 	suite.Run(t, new(TSForm3))
-}
-
-func (ts *TSForm3) BeforeTest(_, _ string) {
-
 }
 
 func (ts *TSForm3) TestValidURL() {
