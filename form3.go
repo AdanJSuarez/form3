@@ -1,10 +1,9 @@
 package form3
 
 import (
-	"errors"
-
 	"github.com/AdanJSuarez/form3/internal"
 	"github.com/AdanJSuarez/form3/internal/validation"
+	"github.com/AdanJSuarez/form3/model"
 )
 
 type Form3 struct {
@@ -12,6 +11,7 @@ type Form3 struct {
 }
 
 // New returns a instance of Form3 client. Returns an error if the URL is wrong.
+// Configuration should be set in this step in a real application.
 func New(URL string) (*Form3, error) {
 	_, err := validation.NewValidation(URL)
 	if err != nil {
@@ -22,6 +22,6 @@ func New(URL string) (*Form3, error) {
 	return f3, nil
 }
 
-func (f *Form3) Create() error {
-	return errors.New("not implemented")
+func (f *Form3) Create(accData model.AccountData) (model.AccountData, error) {
+	return internal.Create(f.url, accData)
 }
