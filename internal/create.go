@@ -12,7 +12,7 @@ import (
 
 var emptyData = model.AccountData{}
 
-func Create(url URL, accountData model.AccountData) (model.AccountData, error) {
+func Create(url string, accountData model.AccountData) (model.AccountData, error) {
 	connection := NewConnection(POST, url)
 	requestBody := setBody(accountData)
 
@@ -39,14 +39,14 @@ func setBody(accData model.AccountData) io.Reader {
 	return bytes.NewBuffer(data)
 }
 
-func decodeResponse(res *http.Response) (model.AccountData, error) {
+func decodeResponse(response *http.Response) (model.AccountData, error) {
 	dataReturned := model.AccountData{}
-	if err := json.NewDecoder(res.Body).Decode(&dataReturned); err != nil {
+	if err := json.NewDecoder(response.Body).Decode(&dataReturned); err != nil {
 		return emptyData, err
 	}
 
-	if res.StatusCode != http.StatusCreated {
-		return emptyData, fmt.Errorf("status code: %d", res.StatusCode)
+	if response.StatusCode != http.StatusCreated {
+		return emptyData, fmt.Errorf("status code: %d", response.StatusCode)
 	}
 
 	return dataReturned, nil
