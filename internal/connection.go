@@ -6,6 +6,7 @@ import (
 )
 
 const timeout = 5 * time.Second
+const POST = "POST"
 
 type URL string
 
@@ -18,6 +19,12 @@ func NewConnection(URL string) *Connection {
 	client := http.Client{
 		Timeout: timeout,
 	}
+	r, err := http.NewRequest(POST, "", nil)
+	if err != nil {
+		//
+	}
+	r.Header.Add("", "")
+	// res, err := client.Do(r)
 
 	return &Connection{url: URL, client: client}
 }
