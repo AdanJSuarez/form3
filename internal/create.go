@@ -12,17 +12,17 @@ import (
 
 var emptyData = model.AccountData{}
 
-func Create(url URL, accData model.AccountData) (model.AccountData, error) {
+func Create(url URL, accountData model.AccountData) (model.AccountData, error) {
 	connection := NewConnection(POST, url)
-	body := setBody(accData)
+	requestBody := setBody(accountData)
 
-	res, err := connection.Post(body)
+	response, err := connection.Post(requestBody)
 	if err != nil {
 		return emptyData, err
 	}
-	defer res.Body.Close()
+	defer response.Body.Close()
 
-	dataReturned, err := decodeResponse(res)
+	dataReturned, err := decodeResponse(response)
 	if err != nil {
 		return emptyData, err
 	}
