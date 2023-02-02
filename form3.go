@@ -7,18 +7,18 @@ import (
 )
 
 type Form3 struct {
-	url internal.URL
+	url string
 }
 
 // New returns a instance of Form3 client. Returns an error if the URL is wrong.
 // Configuration should be set in this step in a real application.
-func New(URL string) (*Form3, error) {
-	_, err := validation.NewValidation(URL)
+func New(url string) (*Form3, error) {
+	_, err := validation.NewValidation(url)
 	if err != nil {
 		return nil, err
 	}
 
-	f3 := &Form3{url: internal.URL(URL)}
+	f3 := &Form3{url: url}
 	return f3, nil
 }
 

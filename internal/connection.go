@@ -3,20 +3,22 @@ package internal
 import (
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 )
 
-const timeout = 5 * time.Second
-const POST = "POST"
-
-type URL string
+const (
+	timeout    = 5 * time.Second
+	POST       = "POST"
+	urlAccount = "/v1/organisation/accounts"
+)
 
 type Connection struct {
-	url    URL
+	url    string
 	client http.Client
 }
 
-func NewConnection(method, url URL) *Connection {
+func NewConnection(method, url string) *Connection {
 	client := http.Client{
 		Timeout: timeout,
 	}
@@ -25,7 +27,12 @@ func NewConnection(method, url URL) *Connection {
 }
 
 func (c *Connection) Post(body io.Reader) (*http.Response, error) {
-	req := request(POST, c.url, body)
+	url, err := url.JoinPath(string(c.url), urlAccount)
+	if err != nil {
+		return nil, err
+	}
+
+	req := request(POST, url, body)
 
 	res, err := c.client.Do(req)
 	if err != nil {
@@ -35,7 +42,7 @@ func (c *Connection) Post(body io.Reader) (*http.Response, error) {
 	return res, nil
 }
 
-func request(method string, url URL, body io.Reader) *http.Request {
+func request(method string, url string, body io.Reader) *http.Request {
 	r, err := http.NewRequest(method, string(url), body)
 	if err != nil {
 		return nil
