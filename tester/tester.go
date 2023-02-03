@@ -37,6 +37,12 @@ func main() {
 	}
 	log.Println("Data: ", data)
 
+	dataFetch, err := account.Fetch("020cf7d8-01b9-461d-89d4-89d57fd0d998")
+	if err != nil {
+		log.Printf("Error on Fetch: %v", err)
+	}
+	log.Println("Data Fetched: ", dataFetch)
+
 }
 
 func generateUUID() string {
