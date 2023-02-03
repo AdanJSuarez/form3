@@ -1,6 +1,10 @@
 package model
 
-type AccountData struct {
+type Data struct {
+	Data Account `json:"data"`
+}
+
+type Account struct {
 	ID             string            `json:"id,omitempty"`
 	OrganisationID string            `json:"organisation_id,omitempty"`
 	Type           string            `json:"type,omitempty"`
