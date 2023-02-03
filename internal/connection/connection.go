@@ -3,6 +3,7 @@ package connection
 import (
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -18,6 +19,7 @@ type Connection struct {
 	client http.Client
 }
 
+// New returns a Connection pointer initialized.
 func New(url string) *Connection {
 	client := http.Client{
 		Timeout: timeout,
@@ -25,8 +27,13 @@ func New(url string) *Connection {
 	return &Connection{url: url, client: client}
 }
 
+// Get returns a http response for the specific URL call. An error otherwise.
 func (c *Connection) Get(value string) (*http.Response, error) {
-	request := c.request(GET, c.url, nil)
+	url, err := url.JoinPath(c.url, value)
+	if err != nil {
+		return nil, err
+	}
+	request := c.request(GET, url, nil)
 	response, err := c.client.Do(request)
 	if err != nil {
 		return nil, err
@@ -35,26 +42,33 @@ func (c *Connection) Get(value string) (*http.Response, error) {
 }
 
 func (c *Connection) Post(body io.Reader) (*http.Response, error) {
-	req := c.request(POST, c.url, body)
-
-	res, err := c.client.Do(req)
+	request := c.request(POST, c.url, body)
+	response, err := c.client.Do(request)
 	if err != nil {
 		return nil, err
 	}
-
-	return res, nil
+	return response, nil
 }
 
-func (c *Connection) Delete() {
-	// TODO: Implement delete
+func (c *Connection) Delete(value string) (*http.Response, error) {
+	url, err := url.JoinPath(c.url, value)
+	if err != nil {
+		return nil, err
+	}
+	request := c.request(DELETE, url, nil)
+	response, err := c.client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
 
 // request returns a request by http method and URL.
 // Easy to set Header if needed.
 func (c *Connection) request(method string, url string, body io.Reader) *http.Request {
-	r, err := http.NewRequest(method, string(url), body)
+	request, err := http.NewRequest(method, string(url), body)
 	if err != nil {
 		return nil
 	}
-	return r
+	return request
 }

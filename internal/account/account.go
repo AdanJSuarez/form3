@@ -14,17 +14,18 @@ import (
 var emptyData = model.Data{}
 
 type Account struct {
-	url        string
 	connection connection.Connection
 }
 
+// New returns a pointer of Account initialized
 func New(url string) *Account {
 	return &Account{
-		url:        url,
 		connection: *connection.New(url),
 	}
 }
 
+// Create creates an bank account and returns the account values.
+// It returns an error otherwise.
 func (a *Account) Create(data model.Data) (model.Data, error) {
 	requestBody := a.requestBody(data)
 	response, err := a.connection.Post(requestBody)
@@ -33,20 +34,43 @@ func (a *Account) Create(data model.Data) (model.Data, error) {
 	}
 	defer response.Body.Close()
 
-	dataReturned, err := a.decodeResponse(response)
-	if err != nil {
-		return emptyData, err
+	if !a.statusCreated(response) {
+		return emptyData, fmt.Errorf("status code: %d", response.StatusCode)
 	}
 
-	return dataReturned, nil
+	return a.decodeResponse(response)
 }
 
+// Fetch retrieves the account information for the specific account ID.
+// It returns an error otherwise.
 func (a *Account) Fetch(accountID string) (model.Data, error) {
 	response, err := a.connection.Get(accountID)
 	if err != nil {
-		return emptyData, err
+		return model.Data{}, err
 	}
+	defer response.Body.Close()
+
+	if !a.statusSuccess(response) {
+		return emptyData, fmt.Errorf("status code: %d", response.StatusCode)
+	}
+
 	return a.decodeResponse(response)
+}
+
+// Delete deletes an account by its ID and version number.
+// It returns an error otherwise.
+func (a *Account) Delete(accountID string, version int) error {
+	accountIDVersion := fmt.Sprintf("%s?version=%d", accountID, version)
+	response, err := a.connection.Delete(accountIDVersion)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if !a.statusDeteted(response) {
+		return fmt.Errorf("status code: %d", response.StatusCode)
+	}
+	// TODO: FINISH DELETE
+	return err
 }
 
 func (a *Account) requestBody(data model.Data) io.Reader {
@@ -54,7 +78,6 @@ func (a *Account) requestBody(data model.Data) io.Reader {
 	if err != nil {
 		return bytes.NewBuffer([]byte{})
 	}
-
 	return bytes.NewBuffer(dataBytes)
 }
 
@@ -63,10 +86,20 @@ func (a *Account) decodeResponse(response *http.Response) (model.Data, error) {
 	if err := json.NewDecoder(response.Body).Decode(dataReturned); err != nil {
 		return emptyData, err
 	}
-
-	if response.StatusCode != http.StatusCreated {
-		return emptyData, fmt.Errorf("status code: %d", response.StatusCode)
-	}
-
 	return *dataReturned, nil
+}
+
+func (a *Account) statusCreated(response *http.Response) bool {
+	return response.StatusCode == http.StatusCreated
+}
+
+func (a *Account) statusSuccess(response *http.Response) bool {
+	return response.StatusCode == http.StatusOK
+}
+
+func (a *Account) statusDeteted(respose *http.Response) bool {
+	if respose.StatusCode == http.StatusNoContent {
+		// TODO: Implement this
+	}
+	return false
 }

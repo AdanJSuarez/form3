@@ -1,7 +1,8 @@
 package form3
 
 import (
-	"path"
+	"log"
+	"net/url"
 
 	"github.com/AdanJSuarez/form3/internal/account"
 	"github.com/AdanJSuarez/form3/internal/validation"
@@ -11,7 +12,7 @@ import (
 type Account interface {
 	Create(data model.Data) (model.Data, error)
 	Fetch(accountID string) (model.Data, error)
-	// Delete(accountID string) (model.Data, error)
+	Delete(accountID string, version int) error
 }
 
 type Form3 struct {
@@ -32,15 +33,11 @@ func New(form3URL string) (*Form3, error) {
 }
 
 func (f *Form3) Account(accountURL string) Account {
-	url := path.Join(f.url, accountURL)
+	url, err := url.JoinPath(f.url, accountURL)
+	if err != nil {
+		log.Println("Error at joining URLs")
+	}
+
 	f.account = account.New(url)
 	return f.account
 }
-
-// func (f *Form3) Create(data model.Data) (model.Data, error) {
-// 	return internal.Create(f.url, data)
-// }
-
-// func (f *Form3) Get(accountID string) (model.Data, error) {
-// 	return internal.Fetch(f.url, accountID)
-// }
