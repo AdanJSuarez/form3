@@ -1,9 +1,11 @@
 # Form3 Homework
 
-Form3 homework. REST client.
+Form3 homework.
 
 Ref:
+
 https://github.com/form3tech-oss/interview-accountapi
+
 https://github.com/form3tech-oss/go-form3
 
 ## Client library
@@ -19,7 +21,7 @@ A nice future feature we could include (not included) is to expose a C-shared AP
 
 ## Use
 
-The library use an extension of the principle of `Hiding Information (OOP)` therefore you only can reach the functionality expose in form3.go that would be:
+The library use an extension of the principle of [Hiding Information](https://en.wikipedia.org/wiki/Information_hiding) therefore you only can reach the functionality expose in form3.go that would be:
 ```go
     type Form3 struct
 ```
