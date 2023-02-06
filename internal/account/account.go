@@ -8,10 +8,10 @@ import (
 	"net/http"
 
 	"github.com/AdanJSuarez/form3/internal/connection"
-	"github.com/AdanJSuarez/form3/model"
+	"github.com/AdanJSuarez/form3/pkg/model"
 )
 
-var emptyData = model.Data{}
+var emptyData = model.DataModel{}
 
 type Account struct {
 	connection connection.Connection
@@ -26,7 +26,7 @@ func New(url string) *Account {
 
 // Create creates an bank account and returns the account values.
 // It returns an error otherwise.
-func (a *Account) Create(data model.Data) (model.Data, error) {
+func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
 	requestBody := a.requestBody(data)
 	response, err := a.connection.Post(requestBody)
 	if err != nil {
@@ -43,10 +43,10 @@ func (a *Account) Create(data model.Data) (model.Data, error) {
 
 // Fetch retrieves the account information for the specific account ID.
 // It returns an error otherwise.
-func (a *Account) Fetch(accountID string) (model.Data, error) {
+func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	response, err := a.connection.Get(accountID)
 	if err != nil {
-		return model.Data{}, err
+		return model.DataModel{}, err
 	}
 	defer response.Body.Close()
 
@@ -73,7 +73,7 @@ func (a *Account) Delete(accountID string, version int) error {
 	return err
 }
 
-func (a *Account) requestBody(data model.Data) io.Reader {
+func (a *Account) requestBody(data model.DataModel) io.Reader {
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
 		return bytes.NewBuffer([]byte{})
@@ -81,8 +81,8 @@ func (a *Account) requestBody(data model.Data) io.Reader {
 	return bytes.NewBuffer(dataBytes)
 }
 
-func (a *Account) decodeResponse(response *http.Response) (model.Data, error) {
-	dataReturned := &model.Data{}
+func (a *Account) decodeResponse(response *http.Response) (model.DataModel, error) {
+	dataReturned := &model.DataModel{}
 	if err := json.NewDecoder(response.Body).Decode(dataReturned); err != nil {
 		return emptyData, err
 	}

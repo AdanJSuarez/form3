@@ -9,7 +9,7 @@ vendor:
 .PHONY: mock
 mock:
 	@echo "==> Generating mocks for unit test <=="
-	# TODO: Generate mocks
+	go generate ./...
 
 .PHONY: test
 unittest:

@@ -3,23 +3,26 @@ package main
 import (
 	"log"
 
-	"github.com/AdanJSuarez/form3"
-	"github.com/AdanJSuarez/form3/model"
+	"github.com/AdanJSuarez/form3/pkg/form3"
+	"github.com/AdanJSuarez/form3/pkg/model"
 	"github.com/google/uuid"
 )
 
+const organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
+
 func main() {
-	form3, err := form3.New("http://localhost:8080")
+	form3, err := form3.New("http://localhost:8080", organizationID)
 	if err != nil {
 		log.Printf("Error on New: %v", err)
 		return
 	}
-	account := form3.Account("/v1/organisation/accounts")
+	form3.SetAccountConfiguration("/v1/organisation/accounts")
+	account := form3.Account()
 
 	data, err := account.Create(model.Data{
-		Data: model.Account{
+		Data: model.AccountData{
 			ID:             generateUUID(),
-			OrganisationID: "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
+			OrganizationID: form3.OrganizationID(),
 			Type:           "accounts",
 			Version:        1,
 			Attributes: model.AccountAttributes{

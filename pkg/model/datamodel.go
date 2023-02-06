@@ -1,18 +1,20 @@
 package model
 
+// Ref: https://www.api-docs.form3.tech/api/schemes/fps-direct/introduction/message-body-structure/data-section
+
+type DataModel struct {
+	Data Data `json:"data"`
+}
+
 type Data struct {
-	Data Account `json:"data"`
+	ID             string     `json:"id,omitempty"`
+	OrganizationID string     `json:"organisation_id,omitempty"`
+	Type           string     `json:"type,omitempty"`
+	Version        int64      `json:"version,omitempty"`
+	Attributes     Attributes `json:"attributes,omitempty"`
 }
 
-type Account struct {
-	ID             string            `json:"id,omitempty"`
-	OrganisationID string            `json:"organisation_id,omitempty"`
-	Type           string            `json:"type,omitempty"`
-	Version        int64             `json:"version,omitempty"`
-	Attributes     AccountAttributes `json:"attributes,omitempty"`
-}
-
-type AccountAttributes struct {
+type Attributes struct {
 	AccountClassification   string   `json:"account_classification,omitempty"`
 	AccountMatchingOptOut   bool     `json:"account_matching_opt_out,omitempty"`
 	AccountNumber           string   `json:"account_number,omitempty"`

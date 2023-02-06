@@ -19,3 +19,6 @@
 
 # Exclude json files
 *.json
+
+# Mocks
+mock_*
