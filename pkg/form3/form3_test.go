@@ -45,9 +45,9 @@ func TestRunSuite(t *testing.T) {
 
 func (ts *TSForm3) BeforeTest(_, _ string) {
 	mockConfiguration := new(mockConfigurationForm3)
-	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
-	mockConfiguration.On("AccountURL", mock.Anything).Return("https://api.fakeaddress:8080/v1/organisation/accounts", nil)
-	form3Test, err = New(validURLTest, accountPath, organizationID)
+	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
+	mockConfiguration.On("AccountURL", mock.Anything).Return("https://api.fakeaddress:8080/v1/organisation/accounts")
+	form3Test = New()
 	form3Test.configuration = mockConfiguration
 }
 
@@ -61,20 +61,28 @@ func (ts *TSForm3) TestValidConfigurationNotNil() {
 
 func (ts *TSForm3) TestInvalidConfiguration() {
 	mockConfiguration := new(mockConfigurationForm3)
-	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(fmt.Errorf("fake error"))
-	f3Test, err := New(validURLTest, accountPath, organizationID)
+	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(fmt.Errorf("fake error"))
+	f3Test := New()
 	f3Test.configuration = mockConfiguration
-	ts.Nil(f3Test)
+	err = f3Test.ConfigurationByValue(validURLTest, accountPath, organizationID)
 	ts.Error(err)
 }
 
-func (ts *TSForm3) TestCreateValidAccount() {
-	mockAccount := new(MockAccount)
-	mockAccount.On("Create", mock.AnythingOfType("model.Data")).Return(dataTest1, nil)
-	form3Test.account = mockAccount
-
-	accountTest := form3Test.Account()
-	dataTest, err := accountTest.Create(dataTest1)
+func (ts *TSForm3) TestValidAccountObject() {
+	err = form3Test.ConfigurationByValue("fakeURL", accountPath, organizationID)
 	ts.Nil(err)
-	ts.Equal(dataTest1, dataTest)
+	account := form3Test.Account()
+	ts.NotNil(account)
+}
+
+func (ts *TSForm3) TestInvalidAccountObject() {
+	mockConfiguration := new(mockConfigurationForm3)
+	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(fmt.Errorf("fake error"))
+	f3Test := New()
+	f3Test.configuration = mockConfiguration
+	err = f3Test.ConfigurationByValue(validURLTest, accountPath, organizationID)
+	ts.NotNil(err)
+	ts.Nil(f3Test.Account())
 }

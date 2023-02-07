@@ -27,7 +27,6 @@ func New(url string) *Connection {
 	return &Connection{url: url, client: client}
 }
 
-// Get returns a http response for the specific URL call. An error otherwise.
 func (c *Connection) Get(value string) (*http.Response, error) {
 	url, err := url.JoinPath(c.url, value)
 	if err != nil {

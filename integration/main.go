@@ -15,9 +15,9 @@ const (
 )
 
 func main() {
-	f3, err := form3.New(localhost, accountPath, organizationID)
-	if err != nil {
-		log.Printf("Error on New: %v", err)
+	f3 := form3.New()
+	if err := f3.ConfigurationByValue(localhost, accountPath, organizationID); err != nil {
+		log.Printf("Error on ConfigurationByValue: %v", err)
 		return
 	}
 	account := f3.Account()
@@ -48,7 +48,6 @@ func main() {
 		log.Printf("Error on Fetch: %v", err)
 	}
 	log.Println("Data Fetched: ", dataFetch)
-
 }
 
 func generateUUID() string {

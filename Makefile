@@ -12,11 +12,12 @@ mock:
 	go generate ./...
 
 .PHONY: test
-unittest:
+test:
 	@echo "==> Running Unit Tests <=="
 	go test ./...
 
 .PHONY: testmock
+testmock:
 	@echo "==> Generating mocks and then run unit test altogether <=="
 	make mock
 	make test

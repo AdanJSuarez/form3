@@ -27,45 +27,41 @@ type Form3 struct {
 	account       Account
 }
 
-// New returns a instance of Form3 client. Returns an error if the URL is wrong.
-// Configuration should be set in this step in a real application.
-func New(baseURL, accountPath, organizationID string) (*Form3, error) {
-	configuration := configuration.New()
-	if err := configuration.InitializeByValue(baseURL, accountPath, organizationID); err != nil {
-		return nil, err
+func New() *Form3 {
+	return &Form3{
+		configuration: configuration.New(),
 	}
-
-	return initializeForm3(configuration)
 }
 
-func NewByYaml() (*Form3, error) {
-	configuration := configuration.New()
-	if err := configuration.InitializeByYaml(); err != nil {
-		return nil, err
+func (f *Form3) ConfigurationByValue(baseURL, accountPath, organizationID string) error {
+	if err := f.configuration.InitializeByValue(baseURL, accountPath, organizationID); err != nil {
+		return err
 	}
-
-	return initializeForm3(configuration)
+	f.initializeForm3()
+	return nil
 }
 
-func NewByEnv() (*Form3, error) {
-	configuration := configuration.New()
-	if err := configuration.InitializeByEnv(); err != nil {
-		return nil, err
+func (f *Form3) ConfigurationByYaml() error {
+	if err := f.configuration.InitializeByYaml(); err != nil {
+		return err
 	}
-
-	return initializeForm3(configuration)
+	f.initializeForm3()
+	return nil
 }
 
-// Account returns an initialized pointer to an object the implement SetAccountConfiguration interface
+func (f *Form3) ConfigurationByEnv() error {
+	if err := f.configuration.InitializeByEnv(); err != nil {
+		return err
+	}
+	f.initializeForm3()
+	return nil
+}
+
 func (f *Form3) Account() Account {
 	return f.account
 }
 
-func initializeForm3(configuration *configuration.Configuration) (*Form3, error) {
-	f3 := &Form3{
-		configuration: configuration,
-	}
-	accountURL := configuration.AccountURL()
-	f3.account = account.New(accountURL)
-	return f3, nil
+func (f *Form3) initializeForm3() {
+	accountURL := f.configuration.AccountURL()
+	f.account = account.New(accountURL)
 }
