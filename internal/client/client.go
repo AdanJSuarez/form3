@@ -1,4 +1,4 @@
-package connection
+package client
 
 import (
 	"io"
@@ -14,25 +14,29 @@ const (
 	DELETE  = "DELETE"
 )
 
-type Connection struct {
+type Client struct {
 	url    string
 	client http.Client
 }
 
-// New returns a Connection pointer initialized.
-func New(url string) *Connection {
+func New(url string) *Client {
 	client := http.Client{
 		Timeout: timeout,
 	}
-	return &Connection{url: url, client: client}
+	return &Client{url: url, client: client}
 }
 
-func (c *Connection) Get(value string) (*http.Response, error) {
+func (c *Client) Get(value string) (*http.Response, error) {
 	url, err := url.JoinPath(c.url, value)
 	if err != nil {
 		return nil, err
 	}
-	request := c.request(GET, url, nil)
+
+	request, err := c.request(GET, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	response, err := c.client.Do(request)
 	if err != nil {
 		return nil, err
@@ -40,8 +44,12 @@ func (c *Connection) Get(value string) (*http.Response, error) {
 	return response, nil
 }
 
-func (c *Connection) Post(body io.Reader) (*http.Response, error) {
-	request := c.request(POST, c.url, body)
+func (c *Client) Post(body io.Reader) (*http.Response, error) {
+	request, err := c.request(POST, c.url, body)
+	if err != nil {
+		return nil, err
+	}
+
 	response, err := c.client.Do(request)
 	if err != nil {
 		return nil, err
@@ -49,12 +57,17 @@ func (c *Connection) Post(body io.Reader) (*http.Response, error) {
 	return response, nil
 }
 
-func (c *Connection) Delete(value string) (*http.Response, error) {
+func (c *Client) Delete(value string) (*http.Response, error) {
 	url, err := url.JoinPath(c.url, value)
 	if err != nil {
 		return nil, err
 	}
-	request := c.request(DELETE, url, nil)
+
+	request, err := c.request(DELETE, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	response, err := c.client.Do(request)
 	if err != nil {
 		return nil, err
@@ -64,10 +77,10 @@ func (c *Connection) Delete(value string) (*http.Response, error) {
 
 // request returns a request by http method and URL.
 // Easy to set Header if needed.
-func (c *Connection) request(method string, url string, body io.Reader) *http.Request {
+func (c *Client) request(method string, url string, body io.Reader) (*http.Request, error) {
 	request, err := http.NewRequest(method, string(url), body)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return request
+	return request, nil
 }
