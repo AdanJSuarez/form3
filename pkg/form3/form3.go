@@ -16,8 +16,10 @@ type Account interface {
 }
 
 type configurationForm3 interface {
+	InitializeByValue(baseURL, accountPath, organizationID string) error
+	InitializeByYaml() error
+	InitializeByEnv() error
 	AccountURL() string
-	OrganizationID() string
 }
 
 type Form3 struct {
@@ -27,9 +29,9 @@ type Form3 struct {
 
 // New returns a instance of Form3 client. Returns an error if the URL is wrong.
 // Configuration should be set in this step in a real application.
-func New(baseURL, organizationID string) (*Form3, error) {
-	configuration, err := configuration.New(baseURL, organizationID)
-	if err != nil {
+func New(baseURL, accountPath, organizationID string) (*Form3, error) {
+	configuration := configuration.New()
+	if err := configuration.InitializeByValue(baseURL, accountPath, organizationID); err != nil {
 		return nil, err
 	}
 
@@ -37,8 +39,8 @@ func New(baseURL, organizationID string) (*Form3, error) {
 }
 
 func NewByYaml() (*Form3, error) {
-	configuration, err := configuration.NewByYaml()
-	if err != nil {
+	configuration := configuration.New()
+	if err := configuration.InitializeByYaml(); err != nil {
 		return nil, err
 	}
 
@@ -46,8 +48,8 @@ func NewByYaml() (*Form3, error) {
 }
 
 func NewByEnv() (*Form3, error) {
-	configuration, err := configuration.NewByEnv()
-	if err != nil {
+	configuration := configuration.New()
+	if err := configuration.InitializeByEnv(); err != nil {
 		return nil, err
 	}
 

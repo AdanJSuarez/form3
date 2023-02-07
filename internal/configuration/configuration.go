@@ -7,40 +7,42 @@ import (
 	"github.com/AdanJSuarez/form3/internal/configuration/validation"
 )
 
-const accountPath = "/v1/organisation/accounts"
-
 type Configuration struct {
 	baseURL        string
 	accountURL     string
 	organizationID string
 }
 
-func New(baseURL, organizationID string) (*Configuration, error) {
+func New() *Configuration {
+	return &Configuration{}
+}
+
+func (c *Configuration) InitializeByValue(baseURL, accountPath, organizationID string) error {
 	_, err := validation.NewValidation(baseURL)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	accountURL, err := joinURLAndPath(baseURL, accountPath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &Configuration{
-		baseURL:        baseURL,
-		accountURL:     accountURL,
-		organizationID: organizationID,
-	}, nil
+	c.baseURL = baseURL
+	c.accountURL = accountURL
+	c.organizationID = organizationID
+
+	return nil
 }
 
-func NewByYaml() (*Configuration, error) {
+func (c *Configuration) InitializeByYaml() error {
 	//TODO: Implement config from a yaml file
-	return nil, fmt.Errorf("not implemented NewByYaml")
+	return fmt.Errorf("not implemented NewByYaml")
 }
 
-func NewByEnv() (*Configuration, error) {
+func (c *Configuration) InitializeByEnv() error {
 	// TODO: Implement config from environment variables
-	return nil, fmt.Errorf("not implemented NewByEnv")
+	return fmt.Errorf("not implemented NewByEnv")
 }
 
 func (c *Configuration) AccountURL() string {

@@ -8,24 +8,27 @@ import (
 	"github.com/google/uuid"
 )
 
-const organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
+const (
+	organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
+	localhost      = "http://localhost:8080"
+	accountPath    = "/v1/organisation/accounts"
+)
 
 func main() {
-	form3, err := form3.New("http://localhost:8080", organizationID)
+	f3, err := form3.New(localhost, accountPath, organizationID)
 	if err != nil {
 		log.Printf("Error on New: %v", err)
 		return
 	}
-	form3.SetAccountConfiguration("/v1/organisation/accounts")
-	account := form3.Account()
+	account := f3.Account()
 
-	data, err := account.Create(model.Data{
-		Data: model.AccountData{
+	data, err := account.Create(model.DataModel{
+		Data: model.Data{
 			ID:             generateUUID(),
-			OrganizationID: form3.OrganizationID(),
+			OrganizationID: organizationID,
 			Type:           "accounts",
 			Version:        1,
-			Attributes: model.AccountAttributes{
+			Attributes: model.Attributes{
 				Country: "GB",
 				// BaseCurrency: "GBP",
 				BankID:     "123456",

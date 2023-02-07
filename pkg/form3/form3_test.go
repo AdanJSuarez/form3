@@ -1,6 +1,7 @@
 package form3
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/AdanJSuarez/form3/pkg/model"
@@ -12,7 +13,7 @@ const (
 	validURLTest   = "https://api.fakeaddress/fake:8080"
 	invalidURLTest = ""
 	organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	accountURL     = "/v1/organisation/accounts"
+	accountPath    = "/v1/organisation/accounts"
 )
 
 var (
@@ -43,32 +44,28 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSForm3) BeforeTest(_, _ string) {
-	form3Test, err = New(validURLTest, organizationID)
+	mockConfiguration := new(mockConfigurationForm3)
+	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
+	mockConfiguration.On("AccountURL", mock.Anything).Return("https://api.fakeaddress:8080/v1/organisation/accounts", nil)
+	form3Test, err = New(validURLTest, accountPath, organizationID)
+	form3Test.configuration = mockConfiguration
 }
 
 func (ts *TSForm3) TestValidConfiguration() {
 	ts.NoError(err)
 }
 
-func (ts *TSForm3) TestValidConfigurationForm3NotNil() {
+func (ts *TSForm3) TestValidConfigurationNotNil() {
 	ts.NotNil(form3Test)
 }
 
 func (ts *TSForm3) TestInvalidConfiguration() {
-	f3Test, err := New(invalidURLTest, organizationID)
+	mockConfiguration := new(mockConfigurationForm3)
+	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(fmt.Errorf("fake error"))
+	f3Test, err := New(validURLTest, accountPath, organizationID)
+	f3Test.configuration = mockConfiguration
 	ts.Nil(f3Test)
 	ts.Error(err)
-}
-
-func (ts *TSForm3) TestSetValidConfiguration() {
-	accountURL := "/v1/organisation/accounts"
-	err := form3Test.SetAccountConfiguration(accountURL)
-	ts.Nil(err)
-}
-
-func (ts *TSForm3) TestSetInvalidAccountConfiguration() {
-	err := form3Test.SetAccountConfiguration(invalidURLTest)
-	ts.NotNil(err)
 }
 
 func (ts *TSForm3) TestCreateValidAccount() {
