@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/AdanJSuarez/form3/internal/client"
 	"github.com/AdanJSuarez/form3/pkg/model"
+)
+
+const (
+	accountIDVersionFmt = "%s?version=%d"
+	emptyBody           = 0
 )
 
 var emptyData = model.DataModel{}
@@ -27,12 +31,12 @@ func New(url string) *Account {
 // Create creates an bank account and returns the account values.
 // It returns an error otherwise.
 func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
-	requestBody := a.requestBody(data)
-	response, err := a.client.Post(requestBody)
+	dataBody := a.dataBody(data)
+	response, err := a.client.Post(dataBody)
 	if err != nil {
 		return emptyData, err
 	}
-	defer response.Body.Close()
+	defer a.closeBody(response)
 
 	if !a.statusCreated(response) {
 		return emptyData, fmt.Errorf("status code: %d", response.StatusCode)
@@ -48,7 +52,7 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	if err != nil {
 		return model.DataModel{}, err
 	}
-	defer response.Body.Close()
+	defer a.closeBody(response)
 
 	if !a.statusSuccess(response) {
 		return emptyData, fmt.Errorf("status code: %d", response.StatusCode)
@@ -60,12 +64,13 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 // Delete deletes an account by its ID and version number.
 // It returns an error otherwise.
 func (a *Account) Delete(accountID string, version int) error {
-	accountIDVersion := fmt.Sprintf("%s?version=%d", accountID, version)
+	accountIDVersion := fmt.Sprintf(accountIDVersionFmt, accountID, version)
 	response, err := a.client.Delete(accountIDVersion)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer a.closeBody(response)
+
 	if !a.statusDeleted(response) {
 		return fmt.Errorf("status code: %d", response.StatusCode)
 	}
@@ -73,12 +78,12 @@ func (a *Account) Delete(accountID string, version int) error {
 	return err
 }
 
-func (a *Account) requestBody(data model.DataModel) io.Reader {
+func (a *Account) dataBody(data model.DataModel) *client.RequestBody {
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
-		return bytes.NewBuffer([]byte{})
+		return client.NewRequestBody(bytes.NewBuffer([]byte{}), emptyBody)
 	}
-	return bytes.NewBuffer(dataBytes)
+	return client.NewRequestBody(bytes.NewBuffer(dataBytes), len(dataBytes))
 }
 
 func (a *Account) decodeResponse(response *http.Response) (model.DataModel, error) {
@@ -97,9 +102,16 @@ func (a *Account) statusSuccess(response *http.Response) bool {
 	return response.StatusCode == http.StatusOK
 }
 
-func (a *Account) statusDeleted(respose *http.Response) bool {
-	if respose.StatusCode == http.StatusNoContent {
+func (a *Account) statusDeleted(response *http.Response) bool {
+	if response.StatusCode == http.StatusNoContent {
 		// TODO: Implement this
+		return false
 	}
 	return false
+}
+
+func (a *Account) closeBody(response *http.Response) {
+	if response.Body != nil {
+		response.Body.Close()
+	}
 }

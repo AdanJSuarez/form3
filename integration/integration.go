@@ -14,6 +14,8 @@ const (
 	accountPath    = "/v1/organisation/accounts"
 )
 
+var jitUUID = generateUUID()
+
 func main() {
 	f3 := form3.New()
 	if err := f3.ConfigurationByValue(localhost, accountPath, organizationID); err != nil {
@@ -24,7 +26,7 @@ func main() {
 
 	data, err := account.Create(model.DataModel{
 		Data: model.Data{
-			ID:             generateUUID(),
+			ID:             jitUUID,
 			OrganizationID: organizationID,
 			Type:           "accounts",
 			Version:        1,
@@ -43,7 +45,7 @@ func main() {
 	}
 	log.Println("Data: ", data)
 
-	dataFetch, err := account.Fetch("020cf7d8-01b9-461d-89d4-89d57fd0d998")
+	dataFetch, err := account.Fetch(jitUUID) //"020cf7d8-01b9-461d-89d4-89d57fd0d998"
 	if err != nil {
 		log.Printf("Error on Fetch: %v", err)
 	}

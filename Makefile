@@ -28,6 +28,7 @@ ut-coverage:
 	# TODO: run unit test with coverage
 
 .PHONY: integration
-integrationtest:
+integration:
 	@echo "==> Running Integration Test <=="
 	# TODO: run integration test. Include dependencies for docker-compose.
+	go run integration/integration.go

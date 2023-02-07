@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	validURLTest   = "https://api.fakeaddress/fake:8080"
+	baseURLTest    = "https://api.fakeaddress/fake:8080"
 	invalidURLTest = ""
 	organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
 	accountPath    = "/v1/organisation/accounts"
+	urlTest        = baseURLTest + accountPath
 )
 
 var (
@@ -46,8 +47,9 @@ func TestRunSuite(t *testing.T) {
 func (ts *TSForm3) BeforeTest(_, _ string) {
 	mockConfiguration := new(mockConfigurationForm3)
 	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
-	mockConfiguration.On("AccountURL", mock.Anything).Return("https://api.fakeaddress:8080/v1/organisation/accounts")
+	mockConfiguration.On("AccountURL", mock.Anything).Return(urlTest)
 	form3Test = New()
+	ts.IsType(new(Form3), form3Test)
 	form3Test.configuration = mockConfiguration
 }
 
@@ -65,7 +67,7 @@ func (ts *TSForm3) TestInvalidConfiguration() {
 		mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(fmt.Errorf("fake error"))
 	f3Test := New()
 	f3Test.configuration = mockConfiguration
-	err = f3Test.ConfigurationByValue(validURLTest, accountPath, organizationID)
+	err = f3Test.ConfigurationByValue(baseURLTest, accountPath, organizationID)
 	ts.Error(err)
 }
 
@@ -82,7 +84,49 @@ func (ts *TSForm3) TestInvalidAccountObject() {
 		mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(fmt.Errorf("fake error"))
 	f3Test := New()
 	f3Test.configuration = mockConfiguration
-	err = f3Test.ConfigurationByValue(validURLTest, accountPath, organizationID)
+	err = f3Test.ConfigurationByValue(baseURLTest, accountPath, organizationID)
 	ts.NotNil(err)
 	ts.Nil(f3Test.Account())
+}
+
+func (ts *TSForm3) TestInvalidConfigurationByYaml() {
+	mockConfiguration := new(mockConfigurationForm3)
+	mockConfiguration.On("InitializeByYaml").Return(fmt.Errorf("not implemented"))
+	mockConfiguration.On("AccountURL", mock.Anything).Return(urlTest)
+	form3Test = New()
+	form3Test.configuration = mockConfiguration
+	err := form3Test.ConfigurationByYaml()
+	ts.NotNil(err)
+}
+
+func (ts *TSForm3) TestValidConfigurationByYaml() {
+	mockConfiguration := new(mockConfigurationForm3)
+	mockConfiguration.On("InitializeByYaml").Return(nil)
+	mockConfiguration.On("AccountURL", mock.Anything).Return(urlTest)
+	form3Test = New()
+	form3Test.configuration = mockConfiguration
+	err := form3Test.ConfigurationByYaml()
+	ts.Nil(err)
+	ts.NotEmpty(form3Test.Account())
+}
+
+func (ts *TSForm3) TestInvalidConfigurationByEnv() {
+	mockConfiguration := new(mockConfigurationForm3)
+	mockConfiguration.On("InitializeByEnv").Return(fmt.Errorf("not implemented"))
+	mockConfiguration.On("AccountURL", mock.Anything).Return(urlTest)
+	form3Test = New()
+	form3Test.configuration = mockConfiguration
+	err := form3Test.ConfigurationByEnv()
+	ts.NotNil(err)
+}
+
+func (ts *TSForm3) TestValidConfigurationByEnv() {
+	mockConfiguration := new(mockConfigurationForm3)
+	mockConfiguration.On("InitializeByEnv").Return(nil)
+	mockConfiguration.On("AccountURL", mock.Anything).Return(urlTest)
+	form3Test = New()
+	form3Test.configuration = mockConfiguration
+	err := form3Test.ConfigurationByEnv()
+	ts.Nil(err)
+	ts.NotEmpty(form3Test.Account())
 }
