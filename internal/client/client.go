@@ -8,10 +8,22 @@ import (
 )
 
 const (
+	GET    = "GET"
+	POST   = "POST"
+	DELETE = "DELETE"
+)
+
+const (
+	HOST_KEY           = "Host"
+	DATE_KEY           = "Date"
+	ACCEPT_KEY         = "Accept"
+	CONTENT_TYPE_KEY   = "Content-Type"
+	CONTENT_LENGTH_KEY = "Content-Length"
+	CONTENT_TYPE_VALUE = "application/vnd.api+json"
+)
+
+const (
 	timeout     = 10 * time.Second
-	GET         = "GET"
-	POST        = "POST"
-	DELETE      = "DELETE"
 	emptySize   = 0
 	defaultHost = "api.form3.tech"
 )
@@ -46,7 +58,7 @@ func (c *Client) Get(value string) (*http.Response, error) {
 	return response, nil
 }
 
-func (c *Client) Post(body *RequestBody) (*http.Response, error) {
+func (c *Client) Post(body RequestBody) (*http.Response, error) {
 	request, err := c.request(POST, c.url, body)
 	if err != nil {
 		return nil, err
@@ -77,18 +89,16 @@ func (c *Client) Delete(value string) (*http.Response, error) {
 	return response, nil
 }
 
-// request returns a request by http method and URL.
-// Easy to set Header if needed.
-func (c *Client) request(method string, url string, body *RequestBody) (*http.Request, error) {
-	request, err := http.NewRequest(method, url, body.Body())
+func (c *Client) request(method string, url string, requestBody RequestBody) (*http.Request, error) {
+	request, err := http.NewRequest(method, url, requestBody.Body())
 	if err != nil {
 		return nil, err
 	}
 
 	c.addRequiredHeader(request)
 
-	if body.Body() != nil {
-		c.addHeaderToRequestWithBody(request, body.Size())
+	if requestBody.Body() != nil {
+		c.addHeaderToRequestWithBody(request, requestBody.Size())
 	}
 
 	return request, nil
@@ -103,14 +113,14 @@ func (c *Client) joinValueToURL(value string) (string, error) {
 }
 
 func (c *Client) addRequiredHeader(request *http.Request) {
-	request.Header.Add("Host", c.getHostFromURL())
-	request.Header.Add("Date", time.Now().String())
-	request.Header.Add("Accept", "application/vnd.api+json")
+	request.Header.Add(HOST_KEY, c.getHostFromURL())
+	request.Header.Add(DATE_KEY, time.Now().String())
+	request.Header.Add(ACCEPT_KEY, CONTENT_TYPE_VALUE)
 }
 
 func (c *Client) addHeaderToRequestWithBody(request *http.Request, size int) {
-	request.Header.Add("Content-Type", "application/vnd.api+json")
-	request.Header.Add("Content-Length", fmt.Sprint(size))
+	request.Header.Add(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE)
+	request.Header.Add(CONTENT_LENGTH_KEY, fmt.Sprint(size))
 }
 
 func (c *Client) getHostFromURL() string {

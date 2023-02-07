@@ -59,9 +59,10 @@ func generateUUID() string {
 
 /*
 - Include vendor or not: https://blog.boot.dev/golang/should-you-commit-the-vendor-folder-in-go/
-- Has to have complete fields.
+- Has to have complete fields. Check which field are forced by the Fake API
 - Try twice the same message gives us a 409: conflict with existing state. ID has to uniq.
-
+- Review the DataModel to remove omitempty of those that are not optional
+- Headers are not check in the Fake API. Should the test fail in that case.
 
 
 	  "country": "GB",
@@ -88,4 +89,49 @@ func generateUUID() string {
         "account_number_code": "BBAN",
         "account_type": 0
       }
+
+Comments:
+Hi 👋
+
+According to the documentation the following fields are deprecated:
+
+title (superseded by name)
+first_name
+bank_account_name
+
+alternative_bank_account_names (superseded by alternative_names)
+
+However those changes don't seem to be implemented in the docker api provided - form3tech/interview-accountapi:v1.0.0-4-g63cf8434. The fields name and alternative_names are being ignored.
+
+Additionally the switched field doesn't persist in the database nor is returned from the API on account creation.
+
+-----------------
+
+Hi,
+
+During account create op for UK account with minimal payload(non CoP) is returning 400 error with message
+"account_classification in body should be one of [Personal Business]"
+
+But according to the doc it's a non required param and only used for the CoP request.
+
+This is creating a bit of confusion on required and non required data.
+
+--
+
+I am not sure if this is the expected behaviour but I have figured what was the issue. I was testing the Create API without omitting empty fields and thus having "account_classification": "" in the payload.
+
+Failed Payload: failed-payload.txt
+
+According to the doc almost all the CoP fields are optional except the name field. Strangely, when I removed only the account_classification field it magically worked but I suspect that it shouldn't!
+
+The required CoP name field that I have passed should have triggered a validation error as this is a required field and I have passed an array of empty strings!
+"name": [ "", "", "", "" ]
+
+Also, When I am passing the name and alternative_names correctly, they are not being set correctly.
+Here is payload: req-resp-payload.txt
+
+No account_number and iban are being generated. Also status field is missing in the response.
+
+
+
 */

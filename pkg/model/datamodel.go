@@ -3,7 +3,8 @@ package model
 // Ref: https://www.api-docs.form3.tech/api/schemes/fps-direct/introduction/message-body-structure/data-section
 
 type DataModel struct {
-	Data Data `json:"data"`
+	Data  Data  `json:"data"`
+	Links Links `json:"links,omitempty"`
 }
 
 type Data struct {
@@ -30,4 +31,12 @@ type Attributes struct {
 	SecondaryIdentification string   `json:"secondary_identification,omitempty"`
 	Status                  string   `json:"status,omitempty"`
 	Switched                bool     `json:"switched,omitempty"`
+}
+
+type Links struct {
+	Self  string `json:"self"`
+	First string `json:"first,omitempty"`
+	Last  string `json:"last,omitempty"`
+	Next  string `json:"next,omitempty"`
+	Prev  string `json:"prev,omitempty"`
 }

@@ -78,7 +78,7 @@ func (a *Account) Delete(accountID string, version int) error {
 	return err
 }
 
-func (a *Account) dataBody(data model.DataModel) *client.RequestBody {
+func (a *Account) dataBody(data model.DataModel) client.RequestBody {
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
 		return client.NewRequestBody(bytes.NewBuffer([]byte{}), emptyBody)

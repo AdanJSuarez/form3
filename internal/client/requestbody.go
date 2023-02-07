@@ -7,8 +7,8 @@ type RequestBody struct {
 	size int
 }
 
-func NewRequestBody(body io.Reader, size int) *RequestBody {
-	return &RequestBody{
+func NewRequestBody(body io.Reader, size int) RequestBody {
+	return RequestBody{
 		body: body,
 		size: size,
 	}

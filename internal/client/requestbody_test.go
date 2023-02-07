@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	requestBodyTest *RequestBody
+	requestBodyTest RequestBody
 	bodyTest        = io.NopCloser(bytes.NewBuffer([]byte("abc")))
 	sizeTest        = 3
 )
@@ -22,7 +22,7 @@ func TestRunTSRequestBody(t *testing.T) {
 
 func (ts *TSRequestBody) BeforeTest(_, _ string) {
 	requestBodyTest = NewRequestBody(bodyTest, sizeTest)
-	ts.IsType(new(RequestBody), requestBodyTest)
+	ts.IsType(RequestBody{}, requestBodyTest)
 }
 
 func (ts *TSRequestBody) TestBody() {
