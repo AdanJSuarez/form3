@@ -51,8 +51,12 @@ func main() {
 	}
 	log.Println("Data Fetched: ", dataFetch)
 
-	if err := account.Delete(jitUUID, 1); err != nil {
+	if err := account.Delete(jitUUID, 0); err != nil {
 		log.Printf("Error on Delete: %v", err)
+	}
+	dataFetch, err = account.Fetch(jitUUID) //"020cf7d8-01b9-461d-89d4-89d57fd0d998"
+	if err != nil {
+		log.Printf("Error on Fetch: %v", err)
 	}
 }
 

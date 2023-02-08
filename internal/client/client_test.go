@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,18 +20,19 @@ const (
 )
 
 var (
-	baseURLTest     *url.URL
-	clientTest      *Client
-	dataTest        = []byte("{data: {moreData: 3}}")
-	responseGetTest = http.Response{
+	clientURLTest       *url.URL
+	clientTest          *Client
+	dataTest            = "{data: {moreData: 3}}"
+	dataBytesMarshal, _ = json.Marshal(dataTest)
+	responseGetTest     = http.Response{
 		Status:     "200 OK",
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBuffer(dataTest)),
+		Body:       io.NopCloser(bytes.NewBuffer(dataBytesMarshal)),
 	}
 	responsePostTest = http.Response{
 		Status:     "201 Created",
 		StatusCode: 201,
-		Body:       io.NopCloser(bytes.NewBuffer(dataTest)),
+		Body:       io.NopCloser(bytes.NewBuffer(dataBytesMarshal)),
 	}
 	responseNotFoundTest = http.Response{
 		Status:     "404 Not Found",
@@ -42,7 +44,7 @@ var (
 		StatusCode: 204,
 		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
 	}
-	reqBodyTest = NewRequestBody(responseNotFoundTest.Body, len(dataTest))
+	reqBodyTest = NewRequestBody(dataTest)
 )
 
 type TSClient struct{ suite.Suite }
@@ -52,8 +54,8 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSClient) BeforeTest(_, _ string) {
-	baseURLTest, _ = url.ParseRequestURI(rawBaseURLTest)
-	clientTest = New(baseURLTest, valueURL)
+	clientURLTest, _ = url.ParseRequestURI(rawBaseURLTest)
+	clientTest = New(*clientURLTest)
 	ts.IsType(new(Client), clientTest)
 	mockHTTPClient := new(mockHttpClient)
 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseGetTest, nil)
@@ -109,7 +111,7 @@ func (ts *TSClient) TestValidDelete() {
 	mockHTTPClient := new(mockHttpClient)
 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseDelete, nil)
 	clientTest.client = mockHTTPClient
-	response, err := clientTest.Delete("fakeValue")
+	response, err := clientTest.Delete("fakeValue", "version", "1")
 	ts.NoError(err)
 	ts.NotNil(response)
 }
@@ -118,7 +120,7 @@ func (ts *TSClient) TestValidDeleteEmptyValue() {
 	mockHTTPClient := new(mockHttpClient)
 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseDelete, nil)
 	clientTest.client = mockHTTPClient
-	response, err := clientTest.Delete("")
+	response, err := clientTest.Delete("", "", "")
 	ts.NoError(err)
 	ts.NotNil(response)
 }
@@ -127,7 +129,7 @@ func (ts *TSClient) TestValidDeleteNotFound() {
 	mockHTTPClient := new(mockHttpClient)
 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseNotFoundTest, nil)
 	clientTest.client = mockHTTPClient
-	response, err := clientTest.Delete("fakeValue")
+	response, err := clientTest.Delete("fakeValue", "version", "1")
 	ts.NoError(err)
 	ts.Equal(&responseNotFoundTest, response)
 	ts.Equal(404, response.StatusCode)
@@ -137,7 +139,7 @@ func (ts *TSClient) TestInvalidDelete() {
 	mockHTTPClient := new(mockHttpClient)
 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, fmt.Errorf("fake error"))
 	clientTest.client = mockHTTPClient
-	response, err := clientTest.Delete("fakeValue")
+	response, err := clientTest.Delete("fakeValue", "version", "1")
 	ts.Error(err)
 	ts.Nil(response)
 }
@@ -149,11 +151,12 @@ func (ts *TSClient) TestValidRequest() {
 	ts.Equal("api.fakeaddress.tech", request.Header.Get(HOST_KEY))
 	ts.NotEmpty(request.Header.Get(DATE_KEY))
 	ts.Equal(CONTENT_TYPE_VALUE, request.Header.Get(CONTENT_TYPE_KEY))
-	ts.Equal(fmt.Sprint(len(dataTest)), request.Header.Get(CONTENT_LENGTH_KEY))
+	ts.Equal(fmt.Sprint(len(dataBytesMarshal)), request.Header.Get(CONTENT_LENGTH_KEY))
+	ts.NotEmpty(request.Header.Get(DIGEST_KEY))
 }
 
 func (ts *TSClient) TestValidRequestNotBody() {
-	rbTest := NewRequestBody(nil, 0)
+	rbTest := NewRequestBody(nil)
 	request, err := clientTest.request(POST, clientTest.stringURL, rbTest)
 	ts.NotNil(request)
 	ts.NoError(err)
@@ -161,6 +164,7 @@ func (ts *TSClient) TestValidRequestNotBody() {
 	ts.NotEmpty(request.Header.Get(DATE_KEY))
 	ts.Equal("", request.Header.Get(CONTENT_TYPE_KEY))
 	ts.Equal("", request.Header.Get(CONTENT_LENGTH_KEY))
+	ts.Equal("", request.Header.Get(DIGEST_KEY))
 }
 
 func (ts *TSClient) TestEmptyResponseAndRequestError() {
@@ -195,7 +199,7 @@ func (ts *TSClient) TestEmptyResponseAndNilRequest() {
 }
 
 func (ts *TSClient) TestJoinValueToURL() {
-	url, err := clientTest.joinValueToURL(idTest)
+	url, err := clientTest.joinValuesToURL(idTest)
 	ts.NoError(err)
 	ts.NotEmpty(url)
 }

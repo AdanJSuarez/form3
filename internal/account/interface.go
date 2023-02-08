@@ -11,5 +11,5 @@ import (
 type Client interface {
 	Get(accoutURL string) (*http.Response, error)
 	Post(requestBody client.RequestBody) (*http.Response, error)
-	Delete(accountIDVersion string) (*http.Response, error)
+	Delete(value, paramKey, paramValue string) (*http.Response, error)
 }

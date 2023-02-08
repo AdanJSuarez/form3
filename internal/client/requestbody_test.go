@@ -2,16 +2,22 @@ package client
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 )
 
+const (
+	rbDataTest     = "{abc: xyzt}"
+	desireExpected = "sha-256=9U2Kll78+c7rXln6XrxIu839WxXH7yij2J77+R8d1iM="
+)
+
 var (
 	requestBodyTest RequestBody
-	bodyTest        = io.NopCloser(bytes.NewBuffer([]byte("abc")))
-	sizeTest        = 3
+	dataByteTest, _ = json.Marshal(rbDataTest)
+	bodyTest        = io.NopCloser(bytes.NewBuffer(dataByteTest))
 )
 
 type TSRequestBody struct{ suite.Suite }
@@ -21,7 +27,7 @@ func TestRunTSRequestBody(t *testing.T) {
 }
 
 func (ts *TSRequestBody) BeforeTest(_, _ string) {
-	requestBodyTest = NewRequestBody(bodyTest, sizeTest)
+	requestBodyTest = NewRequestBody(rbDataTest)
 	ts.IsType(RequestBody{}, requestBodyTest)
 }
 
@@ -32,11 +38,15 @@ func (ts *TSRequestBody) TestBody() {
 
 func (ts *TSRequestBody) TestSize() {
 	size := requestBodyTest.Size()
-	ts.Equal(sizeTest, size)
+	ts.Equal(len(dataByteTest), size)
 }
 
+func (ts *TSRequestBody) TestDesire() {
+	desire := requestBodyTest.Digest()
+	ts.Equal(desireExpected, desire)
+}
 func (ts *TSRequestBody) TestNilBody() {
-	requestBodyTest = NewRequestBody(nil, 0)
+	requestBodyTest = NewRequestBody(nil)
 	body := requestBodyTest.Body()
-	ts.Nil(body)
+	ts.Equal(nil, body)
 }

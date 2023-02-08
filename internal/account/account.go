@@ -1,7 +1,6 @@
 package account
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -23,16 +22,18 @@ type Account struct {
 }
 
 // New returns a pointer of Account initialized
-func New(baseURL *url.URL, accountPath string) *Account {
+func New(baseURL url.URL, accountPath string) *Account {
+	accountURL := baseURL
+	accountURL.Path = accountPath
 	return &Account{
-		client: client.New(baseURL, accountPath),
+		client: client.New(accountURL),
 	}
 }
 
 // Create creates an bank account and returns the account values.
 // It returns an error otherwise.
 func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
-	dataBody := a.dataBody(data)
+	dataBody := client.NewRequestBody(data)
 	response, err := a.client.Post(dataBody)
 	if err != nil {
 		return emptyDataModel, err
@@ -65,8 +66,7 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 // Delete deletes an account by its ID and version number.
 // It returns an error otherwise.
 func (a *Account) Delete(accountID string, version int) error {
-	accountIDVersion := fmt.Sprintf(accountIDVersionFmt, accountID, version)
-	response, err := a.client.Delete(accountIDVersion)
+	response, err := a.client.Delete(accountID, "version", fmt.Sprint(version))
 	if err != nil {
 		return err
 	}
@@ -77,14 +77,6 @@ func (a *Account) Delete(accountID string, version int) error {
 	}
 
 	return err
-}
-
-func (a *Account) dataBody(data model.DataModel) client.RequestBody {
-	dataBytes, err := json.Marshal(data)
-	if err != nil {
-		return client.NewRequestBody(bytes.NewBuffer([]byte{}), emptyBody)
-	}
-	return client.NewRequestBody(bytes.NewBuffer(dataBytes), len(dataBytes))
 }
 
 func (a *Account) decodeResponse(response *http.Response) (model.DataModel, error) {

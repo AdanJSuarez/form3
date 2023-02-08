@@ -49,5 +49,5 @@ func (f *Form3) Account() Account {
 func (f *Form3) initializeForm3() {
 	baseURL := f.configuration.BaseURL()
 	accountPath := f.configuration.AccountPath()
-	f.account = account.New(baseURL, accountPath)
+	f.account = account.New(*baseURL, accountPath)
 }
