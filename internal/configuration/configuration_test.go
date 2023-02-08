@@ -1,14 +1,13 @@
 package configuration
 
 import (
-	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 )
 
 const (
-	baseURL        = "https://api.fakeaddress/fake"
+	rawBaseURL     = "https://api.fakeaddress/fake"
 	invalidURL1    = "https//api.fakeaddress/"
 	invalidURL2    = ""
 	invalidURL3    = "☺xldkj"
@@ -30,60 +29,44 @@ func (ts *TSConfiguration) BeforeTest(_, _ string) {
 }
 
 func (ts *TSConfiguration) TestValidInitializeByValue() {
-	err := configurationTest.InitializeByValue(baseURL, accountPath, organizationID)
+	err := configurationTest.InitializeByValue(rawBaseURL, accountPath, organizationID)
 	ts.NoError(err)
-	accountURL := baseURL + accountPath
-	ts.Equal(baseURL, configurationTest.baseURL)
-	ts.Equal(accountURL, configurationTest.accountURL)
-	ts.Equal(organizationID, configurationTest.organizationID)
+	ts.Equal(rawBaseURL, configurationTest.BaseURL().String())
+	ts.Equal(accountPath, configurationTest.AccountPath())
+	ts.Equal(organizationID, configurationTest.OrganizationID())
 }
 
 func (ts *TSConfiguration) TestInvalidInitializeByValue() {
 	err := configurationTest.InitializeByValue(invalidURL1, accountPath, organizationID)
 	ts.ErrorContains(err, "parse")
-	ts.Empty(configurationTest.baseURL)
-	ts.Empty(configurationTest.accountURL)
-	ts.Empty(configurationTest.organizationID)
-}
-
-func (ts *TSConfiguration) TestValidAccountURL() {
-	err := configurationTest.InitializeByValue(baseURL, accountPath, organizationID)
-	ts.NoError(err)
-	accountURL := baseURL + accountPath
-	ts.Equal(accountURL, configurationTest.AccountURL())
-}
-
-func (ts *TSConfiguration) TestValidOrganisationID() {
-	err := configurationTest.InitializeByValue(baseURL, accountPath, organizationID)
-	ts.NoError(err)
-	ts.Equal(organizationID, configurationTest.OrganizationID())
-}
-
-func (ts *TSConfiguration) TestValidBaseURL() {
-	err := configurationTest.validateBaseURL(baseURL)
-	ts.NoError(err)
+	ts.Empty(configurationTest.BaseURL())
+	ts.Empty(configurationTest.AccountPath())
+	ts.Empty(configurationTest.OrganizationID())
 }
 
 func (ts *TSConfiguration) TestInvalidBaseURL1() {
-	err := configurationTest.validateBaseURL(invalidURL1)
+	url, err := configurationTest.parseRawBaseURL(invalidURL1)
 	ts.Error(err)
+	ts.Nil(url)
 }
 
 func (ts *TSConfiguration) TestInvalidBaseURL2() {
-	err := configurationTest.validateBaseURL(invalidURL2)
+	url, err := configurationTest.parseRawBaseURL(invalidURL2)
 	ts.Error(err)
+	ts.Nil(url)
 }
 
 func (ts *TSConfiguration) TestInvalidBaseURL3() {
-	err := configurationTest.validateBaseURL(invalidURL3)
+	url, err := configurationTest.parseRawBaseURL(invalidURL3)
 	ts.Error(err)
+	ts.Nil(url)
 }
 
 func (ts *TSConfiguration) TestNotImplementedInitializeByYaml() {
 	err := configurationTest.InitializeByYaml()
 	ts.ErrorContains(err, "not implemented")
 	ts.Empty(configurationTest.baseURL)
-	ts.Empty(configurationTest.accountURL)
+	ts.Empty(configurationTest.accountPath)
 	ts.Empty(configurationTest.organizationID)
 }
 
@@ -91,12 +74,6 @@ func (ts *TSConfiguration) TestNotImplementedInitializeByEnv() {
 	err := configurationTest.InitializeByEnv()
 	ts.ErrorContains(err, "not implemented")
 	ts.Empty(configurationTest.baseURL)
-	ts.Empty(configurationTest.accountURL)
+	ts.Empty(configurationTest.accountPath)
 	ts.Empty(configurationTest.organizationID)
-}
-
-func (ts *TSConfiguration) TestJoinPathToURL() {
-	url, err := url.JoinPath(baseURL, accountPath)
-	ts.NoError(err)
-	ts.NotEmpty(url)
 }

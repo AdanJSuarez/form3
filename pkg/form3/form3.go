@@ -16,8 +16,8 @@ func New() *Form3 {
 	}
 }
 
-func (f *Form3) ConfigurationByValue(baseURL, accountPath, organizationID string) error {
-	if err := f.configuration.InitializeByValue(baseURL, accountPath, organizationID); err != nil {
+func (f *Form3) ConfigurationByValue(rawBaseURL, accountPath, organizationID string) error {
+	if err := f.configuration.InitializeByValue(rawBaseURL, accountPath, organizationID); err != nil {
 		return err
 	}
 	f.initializeForm3()
@@ -45,6 +45,7 @@ func (f *Form3) Account() Account {
 }
 
 func (f *Form3) initializeForm3() {
-	accountURL := f.configuration.AccountURL()
-	f.account = account.New(accountURL)
+	baseURL := f.configuration.BaseURL()
+	accountPath := f.configuration.AccountPath()
+	f.account = account.New(baseURL, accountPath)
 }

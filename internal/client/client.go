@@ -29,15 +29,21 @@ const (
 )
 
 type Client struct {
-	url    string
-	client httpClient
+	baseURL   *url.URL
+	stringURL string
+	client    httpClient
 }
 
-func New(url string) *Client {
+func New(baseURL *url.URL, valuesURL ...string) *Client {
+	stringURL, _ := url.JoinPath(baseURL.String(), valuesURL...)
 	client := &http.Client{
 		Timeout: timeout,
 	}
-	return &Client{url: url, client: client}
+	return &Client{
+		baseURL:   baseURL,
+		stringURL: stringURL,
+		client:    client,
+	}
 }
 
 func (c *Client) Get(value string) (*http.Response, error) {
@@ -59,7 +65,7 @@ func (c *Client) Get(value string) (*http.Response, error) {
 }
 
 func (c *Client) Post(body RequestBody) (*http.Response, error) {
-	request, err := c.request(POST, c.url, body)
+	request, err := c.request(POST, c.stringURL, body)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +111,7 @@ func (c *Client) request(method string, url string, requestBody RequestBody) (*h
 }
 
 func (c *Client) joinValueToURL(value string) (string, error) {
-	url, err := url.JoinPath(c.url, value)
+	url, err := url.JoinPath(c.stringURL, value)
 	if err != nil {
 		return "", err
 	}
@@ -113,7 +119,7 @@ func (c *Client) joinValueToURL(value string) (string, error) {
 }
 
 func (c *Client) addRequiredHeader(request *http.Request) {
-	request.Header.Add(HOST_KEY, c.getHostFromURL())
+	request.Header.Add(HOST_KEY, c.baseURL.Host)
 	request.Header.Add(DATE_KEY, time.Now().String())
 	request.Header.Add(ACCEPT_KEY, CONTENT_TYPE_VALUE)
 }
@@ -121,12 +127,4 @@ func (c *Client) addRequiredHeader(request *http.Request) {
 func (c *Client) addHeaderToRequestWithBody(request *http.Request, size int) {
 	request.Header.Add(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE)
 	request.Header.Add(CONTENT_LENGTH_KEY, fmt.Sprint(size))
-}
-
-func (c *Client) getHostFromURL() string {
-	u, err := url.Parse(c.url)
-	if err != nil {
-		return defaultHost
-	}
-	return u.Host
 }

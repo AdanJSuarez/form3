@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -12,11 +13,13 @@ import (
 )
 
 const (
-	urlTest = "https://api.fakeaddress.tech/fake/v1/organisation/accounts"
-	idTest  = "020cf7d8-01b9-461d-89d4-89d57fd0d998"
+	rawBaseURLTest = "https://api.fakeaddress.tech/fake"
+	valueURL       = "/v1/organisation/accounts"
+	idTest         = "020cf7d8-01b9-461d-89d4-89d57fd0d998"
 )
 
 var (
+	baseURLTest     *url.URL
 	clientTest      *Client
 	dataTest        = []byte("{data: {moreData: 3}}")
 	responseGetTest = http.Response{
@@ -49,7 +52,8 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSClient) BeforeTest(_, _ string) {
-	clientTest = New(urlTest)
+	baseURLTest, _ = url.ParseRequestURI(rawBaseURLTest)
+	clientTest = New(baseURLTest, valueURL)
 	ts.IsType(new(Client), clientTest)
 	mockHTTPClient := new(mockHttpClient)
 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseGetTest, nil)
@@ -139,7 +143,7 @@ func (ts *TSClient) TestInvalidDelete() {
 }
 
 func (ts *TSClient) TestValidRequest() {
-	request, err := clientTest.request(POST, urlTest, reqBodyTest)
+	request, err := clientTest.request(POST, clientTest.stringURL, reqBodyTest)
 	ts.NotNil(request)
 	ts.NoError(err)
 	ts.Equal("api.fakeaddress.tech", request.Header.Get(HOST_KEY))
@@ -150,7 +154,7 @@ func (ts *TSClient) TestValidRequest() {
 
 func (ts *TSClient) TestValidRequestNotBody() {
 	rbTest := NewRequestBody(nil, 0)
-	request, err := clientTest.request(POST, urlTest, rbTest)
+	request, err := clientTest.request(POST, clientTest.stringURL, rbTest)
 	ts.NotNil(request)
 	ts.NoError(err)
 	ts.Equal("api.fakeaddress.tech", request.Header.Get(HOST_KEY))

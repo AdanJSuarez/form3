@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/AdanJSuarez/form3/internal/client"
 	"github.com/AdanJSuarez/form3/pkg/model"
@@ -15,16 +16,16 @@ const (
 	emptyBody           = 0
 )
 
-var emptyData = model.DataModel{}
+var emptyDataModel = model.DataModel{}
 
 type Account struct {
-	client client.Client
+	client Client
 }
 
 // New returns a pointer of Account initialized
-func New(url string) *Account {
+func New(baseURL *url.URL, accountPath string) *Account {
 	return &Account{
-		client: *client.New(url),
+		client: client.New(baseURL, accountPath),
 	}
 }
 
@@ -34,12 +35,12 @@ func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
 	dataBody := a.dataBody(data)
 	response, err := a.client.Post(dataBody)
 	if err != nil {
-		return emptyData, err
+		return emptyDataModel, err
 	}
 	defer a.closeBody(response)
 
 	if !a.statusCreated(response) {
-		return emptyData, fmt.Errorf("status code: %d", response.StatusCode)
+		return emptyDataModel, fmt.Errorf("status code: %d", response.StatusCode)
 	}
 
 	return a.decodeResponse(response)
@@ -55,7 +56,7 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	defer a.closeBody(response)
 
 	if !a.statusSuccess(response) {
-		return emptyData, fmt.Errorf("status code: %d", response.StatusCode)
+		return emptyDataModel, fmt.Errorf("status code: %d", response.StatusCode)
 	}
 
 	return a.decodeResponse(response)
@@ -89,7 +90,7 @@ func (a *Account) dataBody(data model.DataModel) client.RequestBody {
 func (a *Account) decodeResponse(response *http.Response) (model.DataModel, error) {
 	dataReturned := &model.DataModel{}
 	if err := json.NewDecoder(response.Body).Decode(dataReturned); err != nil {
-		return emptyData, err
+		return emptyDataModel, err
 	}
 	return *dataReturned, nil
 }
