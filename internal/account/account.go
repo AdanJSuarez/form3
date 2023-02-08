@@ -51,7 +51,7 @@ func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
 func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	response, err := a.client.Get(accountID)
 	if err != nil {
-		return model.DataModel{}, err
+		return emptyDataModel, err
 	}
 	defer a.closeBody(response)
 
@@ -104,11 +104,7 @@ func (a *Account) statusSuccess(response *http.Response) bool {
 }
 
 func (a *Account) statusDeleted(response *http.Response) bool {
-	if response.StatusCode == http.StatusNoContent {
-		// TODO: Implement this
-		return false
-	}
-	return false
+	return response.StatusCode == http.StatusNoContent
 }
 
 func (a *Account) closeBody(response *http.Response) {

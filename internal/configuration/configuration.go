@@ -6,16 +6,15 @@ import (
 )
 
 type Configuration struct {
-	baseURL        *url.URL
-	accountPath    string
-	organizationID string
+	baseURL     *url.URL
+	accountPath string
 }
 
 func New() *Configuration {
 	return &Configuration{}
 }
 
-func (c *Configuration) InitializeByValue(rawBaseURL, accountPath, organizationID string) error {
+func (c *Configuration) InitializeByValue(rawBaseURL, accountPath string) error {
 	baseURL, err := c.parseRawBaseURL(rawBaseURL)
 	if err != nil {
 		return err
@@ -23,7 +22,6 @@ func (c *Configuration) InitializeByValue(rawBaseURL, accountPath, organizationI
 
 	c.baseURL = baseURL
 	c.accountPath = accountPath
-	c.organizationID = organizationID
 
 	return nil
 }
@@ -34,10 +32,6 @@ func (c *Configuration) BaseURL() *url.URL {
 
 func (c *Configuration) AccountPath() string {
 	return c.accountPath
-}
-
-func (c *Configuration) OrganizationID() string {
-	return c.organizationID
 }
 
 func (c *Configuration) InitializeByYaml() error {

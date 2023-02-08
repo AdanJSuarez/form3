@@ -7,7 +7,7 @@ import (
 )
 
 //go:generate mockery --inpackage --name=Account
-//go:generate mockery --inpackage --name=configurationForm3
+//go:generate mockery --inpackage --name=f3Configuration
 
 type Account interface {
 	Create(data model.DataModel) (model.DataModel, error)
@@ -18,7 +18,7 @@ type Account interface {
 type f3Configuration interface {
 	BaseURL() *url.URL
 	AccountPath() string
-	InitializeByValue(rawBaseURL, accountPath, organizationID string) error
+	InitializeByValue(rawBaseURL, accountPath string) error
 	InitializeByYaml() error
 	InitializeByEnv() error
 }

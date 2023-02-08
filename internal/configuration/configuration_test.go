@@ -29,19 +29,17 @@ func (ts *TSConfiguration) BeforeTest(_, _ string) {
 }
 
 func (ts *TSConfiguration) TestValidInitializeByValue() {
-	err := configurationTest.InitializeByValue(rawBaseURL, accountPath, organizationID)
+	err := configurationTest.InitializeByValue(rawBaseURL, accountPath)
 	ts.NoError(err)
 	ts.Equal(rawBaseURL, configurationTest.BaseURL().String())
 	ts.Equal(accountPath, configurationTest.AccountPath())
-	ts.Equal(organizationID, configurationTest.OrganizationID())
 }
 
 func (ts *TSConfiguration) TestInvalidInitializeByValue() {
-	err := configurationTest.InitializeByValue(invalidURL1, accountPath, organizationID)
+	err := configurationTest.InitializeByValue(invalidURL1, accountPath)
 	ts.ErrorContains(err, "parse")
 	ts.Empty(configurationTest.BaseURL())
 	ts.Empty(configurationTest.AccountPath())
-	ts.Empty(configurationTest.OrganizationID())
 }
 
 func (ts *TSConfiguration) TestInvalidBaseURL1() {
@@ -67,7 +65,6 @@ func (ts *TSConfiguration) TestNotImplementedInitializeByYaml() {
 	ts.ErrorContains(err, "not implemented")
 	ts.Empty(configurationTest.baseURL)
 	ts.Empty(configurationTest.accountPath)
-	ts.Empty(configurationTest.organizationID)
 }
 
 func (ts *TSConfiguration) TestNotImplementedInitializeByEnv() {
@@ -75,5 +72,4 @@ func (ts *TSConfiguration) TestNotImplementedInitializeByEnv() {
 	ts.ErrorContains(err, "not implemented")
 	ts.Empty(configurationTest.baseURL)
 	ts.Empty(configurationTest.accountPath)
-	ts.Empty(configurationTest.organizationID)
 }

@@ -16,14 +16,15 @@ func New() *Form3 {
 	}
 }
 
-func (f *Form3) ConfigurationByValue(rawBaseURL, accountPath, organizationID string) error {
-	if err := f.configuration.InitializeByValue(rawBaseURL, accountPath, organizationID); err != nil {
+func (f *Form3) ConfigurationByValue(rawBaseURL, accountPath string) error {
+	if err := f.configuration.InitializeByValue(rawBaseURL, accountPath); err != nil {
 		return err
 	}
 	f.initializeForm3()
 	return nil
 }
 
+// ConfigurationByYaml returns error: Not implemented (for simplicity)
 func (f *Form3) ConfigurationByYaml() error {
 	if err := f.configuration.InitializeByYaml(); err != nil {
 		return err
@@ -32,6 +33,7 @@ func (f *Form3) ConfigurationByYaml() error {
 	return nil
 }
 
+// ConfigurationByEnv returns error: Not implemented (for simplicity)
 func (f *Form3) ConfigurationByEnv() error {
 	if err := f.configuration.InitializeByEnv(); err != nil {
 		return err

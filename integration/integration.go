@@ -18,7 +18,7 @@ var jitUUID = generateUUID()
 
 func main() {
 	f3 := form3.New()
-	if err := f3.ConfigurationByValue(localhost, accountPath, organizationID); err != nil {
+	if err := f3.ConfigurationByValue(localhost, accountPath); err != nil {
 		log.Printf("Error on ConfigurationByValue: %v", err)
 		return
 	}
