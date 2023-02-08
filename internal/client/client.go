@@ -28,8 +28,7 @@ const (
 )
 
 type Client struct {
-	url       url.URL
-	stringURL string
+	clientURL url.URL
 	client    httpClient
 }
 
@@ -38,8 +37,7 @@ func New(clientURL url.URL) *Client {
 		Timeout: timeout,
 	}
 	return &Client{
-		url:       clientURL,
-		stringURL: clientURL.String(),
+		clientURL: clientURL,
 		client:    client,
 	}
 }
@@ -63,7 +61,7 @@ func (c *Client) Get(value string) (*http.Response, error) {
 }
 
 func (c *Client) Post(body RequestBody) (*http.Response, error) {
-	request, err := c.request(POST, c.stringURL, body)
+	request, err := c.request(POST, c.clientURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -85,9 +83,8 @@ func (c *Client) Delete(value, parameterKey, parameterValue string) (*http.Respo
 	if err != nil {
 		return nil, err
 	}
-	query := request.URL.Query()
-	query.Add(parameterKey, parameterValue)
-	request.URL.RawQuery = query.Encode()
+
+	c.query(request, parameterKey, parameterValue)
 
 	response, err := c.doRequest(request)
 	if err != nil {
@@ -124,15 +121,21 @@ func (c *Client) doRequest(request *http.Request) (*http.Response, error) {
 }
 
 func (c *Client) joinValuesToURL(values ...string) (string, error) {
-	url, err := url.JoinPath(c.stringURL, values...)
+	url, err := url.JoinPath(c.clientURL.String(), values...)
 	if err != nil {
 		return "", err
 	}
 	return url, nil
 }
 
+func (c *Client) query(request *http.Request, parameterKey, parameterValue string) {
+	query := request.URL.Query()
+	query.Add(parameterKey, parameterValue)
+	request.URL.RawQuery = query.Encode()
+}
+
 func (c *Client) addRequiredHeader(request *http.Request) {
-	request.Header.Add(HOST_KEY, c.url.Host)
+	request.Header.Add(HOST_KEY, c.clientURL.Host)
 	request.Header.Add(DATE_KEY, time.Now().Format(time.RFC1123))
 	request.Header.Add(ACCEPT_KEY, CONTENT_TYPE_VALUE)
 }
