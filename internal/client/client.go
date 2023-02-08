@@ -57,7 +57,7 @@ func (c *Client) Get(value string) (*http.Response, error) {
 		return nil, err
 	}
 
-	response, err := c.client.Do(request)
+	response, err := c.doRequest(request)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (c *Client) Post(body RequestBody) (*http.Response, error) {
 		return nil, err
 	}
 
-	response, err := c.client.Do(request)
+	response, err := c.doRequest(request)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (c *Client) Delete(value string) (*http.Response, error) {
 		return nil, err
 	}
 
-	response, err := c.client.Do(request)
+	response, err := c.doRequest(request)
 	if err != nil {
 		return nil, err
 	}
@@ -108,6 +108,18 @@ func (c *Client) request(method string, url string, requestBody RequestBody) (*h
 	}
 
 	return request, nil
+}
+
+func (c *Client) doRequest(request *http.Request) (*http.Response, error) {
+	emptyResponse := &http.Response{}
+	response, err := c.client.Do(request)
+	if err != nil {
+		return emptyResponse, err
+	}
+	if response == nil {
+		return emptyResponse, fmt.Errorf("nil response")
+	}
+	return response, err
 }
 
 func (c *Client) joinValueToURL(value string) (string, error) {

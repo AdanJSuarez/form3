@@ -163,6 +163,37 @@ func (ts *TSClient) TestValidRequestNotBody() {
 	ts.Equal("", request.Header.Get(CONTENT_LENGTH_KEY))
 }
 
+func (ts *TSClient) TestEmptyResponseAndRequestError() {
+	mockHTTPClient := new(mockHttpClient)
+	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, fmt.Errorf("fake error"))
+	clientTest.client = mockHTTPClient
+	request, err := clientTest.request(POST, clientTest.stringURL, reqBodyTest)
+	ts.NoError(err)
+	response, err := clientTest.doRequest(request)
+	ts.ErrorContains(err, "fake error")
+	ts.NotNil(response)
+}
+
+func (ts *TSClient) TestEmptyResponseAndNilResponseError() {
+	mockHTTPClient := new(mockHttpClient)
+	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, nil)
+	clientTest.client = mockHTTPClient
+	request, err := clientTest.request(POST, clientTest.stringURL, reqBodyTest)
+	ts.NoError(err)
+	response, err := clientTest.doRequest(request)
+	ts.ErrorContains(err, "nil response")
+	ts.NotNil(response)
+}
+
+func (ts *TSClient) TestEmptyResponseAndNilRequest() {
+	mockHTTPClient := new(mockHttpClient)
+	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, nil)
+	clientTest.client = mockHTTPClient
+	response, err := clientTest.doRequest(nil)
+	ts.ErrorContains(err, "nil response")
+	ts.NotNil(response)
+}
+
 func (ts *TSClient) TestJoinValueToURL() {
 	url, err := clientTest.joinValueToURL(idTest)
 	ts.NoError(err)

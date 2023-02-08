@@ -50,6 +50,10 @@ func main() {
 		log.Printf("Error on Fetch: %v", err)
 	}
 	log.Println("Data Fetched: ", dataFetch)
+
+	if err := account.Delete(jitUUID, 1); err != nil {
+		log.Printf("Error on Delete: %v", err)
+	}
 }
 
 func generateUUID() string {

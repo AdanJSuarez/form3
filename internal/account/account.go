@@ -75,7 +75,7 @@ func (a *Account) Delete(accountID string, version int) error {
 	if !a.statusDeleted(response) {
 		return fmt.Errorf("status code: %d", response.StatusCode)
 	}
-	// TODO: FINISH DELETE
+
 	return err
 }
 
