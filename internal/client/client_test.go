@@ -203,3 +203,10 @@ func (ts *TSClient) TestJoinValueToURL() {
 	ts.NoError(err)
 	ts.NotEmpty(url)
 }
+
+func (ts *TSClient) TestQuery() {
+	request, err := clientTest.request(DELETE, clientTest.clientURL.String(), NewRequestBody(nil))
+	ts.NoError(err)
+	clientTest.query(request, "fakeKey", "fakeValue")
+	ts.Equal("fakeKey=fakeValue", request.URL.RawQuery)
+}

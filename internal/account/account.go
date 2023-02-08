@@ -10,11 +10,6 @@ import (
 	"github.com/AdanJSuarez/form3/pkg/model"
 )
 
-const (
-	accountIDVersionFmt = "%s?version=%d"
-	emptyBody           = 0
-)
-
 var emptyDataModel = model.DataModel{}
 
 type Account struct {
@@ -23,10 +18,9 @@ type Account struct {
 
 // New returns a pointer of Account initialized
 func New(baseURL url.URL, accountPath string) *Account {
-	accountURL := baseURL
-	accountURL.Path = accountPath
+	baseURL.Path = accountPath
 	return &Account{
-		client: client.New(accountURL),
+		client: client.New(baseURL),
 	}
 }
 
