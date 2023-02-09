@@ -14,7 +14,8 @@ mock:
 .PHONY: test
 test:
 	@echo "==> Running Unit Tests 🇨🇦 <=="
-	go test ./...
+	go test ./pkg/...
+	go test ./internal/...
 
 .PHONY: testmock
 testmock:
@@ -31,4 +32,4 @@ ut-coverage:
 integration:
 	@echo "==> Running Integration Test 🎵 <=="
 	# TODO: run integration test. Include dependencies for docker-compose.
-	go run integration/integration.go
+	go test ./integration

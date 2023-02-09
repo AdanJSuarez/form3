@@ -1,69 +1,71 @@
-package main
+package integration
 
-import (
-	"log"
+// package main
 
-	"github.com/AdanJSuarez/form3/pkg/form3"
-	"github.com/AdanJSuarez/form3/pkg/model"
-	"github.com/google/uuid"
-)
+// import (
+// 	"log"
 
-const (
-	organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	localhost      = "http://localhost:8080"
-	accountPath    = "/v1/organisation/accounts"
-)
+// 	"github.com/AdanJSuarez/form3/pkg/form3"
+// 	"github.com/AdanJSuarez/form3/pkg/model"
+// 	"github.com/google/uuid"
+// )
 
-var jitUUID = generateUUID()
+// const (
+// 	organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
+// 	localhost      = "http://localhost:8080"
+// 	accountPath    = "/v1/organisation/accounts"
+// )
 
-func main() {
-	f3 := form3.New()
-	if err := f3.ConfigurationByValue(localhost, accountPath); err != nil {
-		log.Printf("Error on ConfigurationByValue: %v", err)
-		return
-	}
-	account := f3.Account()
+// var jitUUID = generateUUID()
 
-	data, err := account.Create(model.DataModel{
-		Data: model.Data{
-			ID:             jitUUID,
-			OrganizationID: organizationID,
-			Type:           "accounts",
-			Version:        1,
-			Attributes: model.Attributes{
-				Country: "GB",
-				// BaseCurrency: "GBP",
-				BankID:     "123456",
-				BankIDCode: "GBDSC",
-				Bic:        "EXMPLGB2XXX",
-				Name:       []string{"a", "b"},
-			},
-		}})
-	if err != nil {
-		log.Printf("Error on Create: %v", err)
-		return
-	}
-	log.Println("Data: ", data)
+// func main() {
+// 	f3 := form3.New()
+// 	if err := f3.ConfigurationByValue(localhost, accountPath); err != nil {
+// 		log.Printf("Error on ConfigurationByValue: %v", err)
+// 		return
+// 	}
+// 	account := f3.Account()
 
-	dataFetch, err := account.Fetch(jitUUID) //"020cf7d8-01b9-461d-89d4-89d57fd0d998"
-	if err != nil {
-		log.Printf("Error on Fetch: %v", err)
-	}
-	log.Println("Data Fetched: ", dataFetch)
+// 	data, err := account.Create(model.DataModel{
+// 		Data: model.Data{
+// 			ID:             jitUUID,
+// 			OrganizationID: organizationID,
+// 			Type:           "accounts",
+// 			Version:        1,
+// 			Attributes: model.Attributes{
+// 				Country: "GB",
+// 				// BaseCurrency: "GBP",
+// 				BankID:     "123456",
+// 				BankIDCode: "GBDSC",
+// 				Bic:        "EXMPLGB2XXX",
+// 				Name:       []string{"a", "b"},
+// 			},
+// 		}})
+// 	if err != nil {
+// 		log.Printf("Error on Create: %v", err)
+// 		return
+// 	}
+// 	log.Println("Data: ", data)
 
-	if err := account.Delete(jitUUID, 0); err != nil {
-		log.Printf("Error on Delete: %v", err)
-	}
-	dataFetch, err = account.Fetch(jitUUID) //"020cf7d8-01b9-461d-89d4-89d57fd0d998"
-	if err != nil {
-		log.Printf("Error on Fetch: %v", err)
-	}
-}
+// 	dataFetch, err := account.Fetch(jitUUID) //"020cf7d8-01b9-461d-89d4-89d57fd0d998"
+// 	if err != nil {
+// 		log.Printf("Error on Fetch: %v", err)
+// 	}
+// 	log.Println("Data Fetched: ", dataFetch)
 
-func generateUUID() string {
-	id := uuid.New()
-	return id.String()
-}
+// 	if err := account.Delete(jitUUID, 0); err != nil {
+// 		log.Printf("Error on Delete: %v", err)
+// 	}
+// 	dataFetch, err = account.Fetch(jitUUID) //"020cf7d8-01b9-461d-89d4-89d57fd0d998"
+// 	if err != nil {
+// 		log.Printf("Error on Fetch: %v", err)
+// 	}
+// }
+
+// func generateUUID() string {
+// 	id := uuid.New()
+// 	return id.String()
+// }
 
 /*
 - Include vendor or not: https://blog.boot.dev/golang/should-you-commit-the-vendor-folder-in-go/

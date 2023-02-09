@@ -84,7 +84,7 @@ func (c *Client) Delete(value, parameterKey, parameterValue string) (*http.Respo
 		return nil, err
 	}
 
-	c.query(request, parameterKey, parameterValue)
+	c.setQuery(request, parameterKey, parameterValue)
 
 	response, err := c.doRequest(request)
 	if err != nil {
@@ -128,7 +128,7 @@ func (c *Client) joinValuesToURL(values ...string) (string, error) {
 	return url, nil
 }
 
-func (c *Client) query(request *http.Request, parameterKey, parameterValue string) {
+func (c *Client) setQuery(request *http.Request, parameterKey, parameterValue string) {
 	query := request.URL.Query()
 	query.Add(parameterKey, parameterValue)
 	request.URL.RawQuery = query.Encode()
