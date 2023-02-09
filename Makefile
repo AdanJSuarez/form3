@@ -11,6 +11,16 @@ mock:
 	@echo "==> Generating mocks for unit test 🇪🇸 <=="
 	go generate ./...
 
+.PHONY: mockdocker
+mockdocker:
+	@echo "==> Generation mocks for unit test using Docker"
+	docker run -v "$PWD":/src -w /src vektra/mockery --all --inpackage
+
+.PHONE: rmmock
+rmmock:
+	@echo "==> Removing all mock files  <=="
+	find . -name 'mock_*' -type f -delete
+
 .PHONY: test
 test:
 	@echo "==> Running Unit Tests 🇨🇦 <=="
@@ -33,3 +43,10 @@ integration:
 	@echo "==> Running Integration Test 🎵 <=="
 	# TODO: run integration test. Include dependencies for docker-compose.
 	go test ./integration
+
+.PHONE: clean
+clean:
+	@echo "==> Cleaning ..."
+	docker compose down
+	docker image rm form3-test
+	docker builder prune

@@ -39,3 +39,7 @@ The library use an extension of the principle of [Hiding Information](https://en
 The eternal discussion of pushing the dependency to your repo. I saw in your client [repo](https://github.com/form3tech-oss/go-form3) you included it, so I took the same approach.
 This, as everything in live, brings pros and cons.
 This blog post talk about this... and he is a big fun btw :) [link](https://blog.boot.dev/golang/should-you-commit-the-vendor-folder-in-go/)
+
+
+## Network
+https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach
