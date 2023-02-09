@@ -92,7 +92,7 @@ func (ts *TSIntegration) startHealthCheck() {
 			return
 		}
 	}
-	log.Fatal("Server not ready")
+	log.Fatal("==> Server not ready. Integration tests cannot run! <==")
 }
 
 func (ts *TSIntegration) getRequest() bool {
