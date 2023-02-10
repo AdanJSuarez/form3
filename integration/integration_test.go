@@ -16,7 +16,7 @@ const (
 	healthCheckNumOfTries = 5
 	healthCheckInterval   = 5 * time.Second
 	organizationID        = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	localhostURL          = "http://host.docker.internal:8080"
+	localhostURL          = "http://accountapi:8080"
 	accountPath           = "/v1/organisation/accounts"
 )
 

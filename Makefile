@@ -47,6 +47,6 @@ integration:
 .PHONE: clean
 clean:
 	@echo "==> Cleaning ..."
-	docker compose down
+	docker-compose down
 	docker image rm form3-test
 	docker builder prune

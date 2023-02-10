@@ -21,8 +21,6 @@ services:
       - DATABASE-PASSWORD=123
     ports:
       - 8080:8080
-    extra_hosts:
-    - "host.docker.internal:host-gateway"
 
   postgresql:
     image: postgres:9.5-alpine
@@ -39,21 +37,14 @@ services:
       - ./scripts/db:/docker-entrypoint-initdb.d/
     ports:
       - 5432:5432
-    extra_hosts:
-    - "host.docker.internal:host-gateway"
 
   vault:
     image: vault:1.6.3
     environment:
       - SKIP_SETCAP=1
       - VAULT_DEV_ROOT_TOKEN_ID=8fb95528-57c6-422e-9722-d2147bcba8ed
-    extra_hosts:
-    - "host.docker.internal:host-gateway"
 
   test:
     build: .
     depends_on:
       - accountapi
-    extra_hosts:
-    - "host.docker.internal:host-gateway"
-

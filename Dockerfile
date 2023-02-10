@@ -9,8 +9,6 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-# EXPOSE 8080
-
 # Install Mockery to generate the mocks needed for the unit test
 RUN go install github.com/vektra/mockery/v2@latest && go generate ./...
 

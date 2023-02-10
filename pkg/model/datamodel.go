@@ -8,8 +8,8 @@ type DataModel struct {
 }
 
 type Data struct {
-	ID             string     `json:"id,omitempty"`
-	OrganizationID string     `json:"organisation_id,omitempty"`
+	ID             string     `json:"id"`
+	OrganizationID string     `json:"organisation_id"`
 	Type           string     `json:"type,omitempty"`
 	Version        int64      `json:"version,omitempty"`
 	Attributes     Attributes `json:"attributes,omitempty"`
