@@ -6,7 +6,6 @@ import (
 )
 
 //go:generate mockery --inpackage --name=httpClient
-//go:generate mockery --inpackage --name=statusHandler
 
 type RequestBody interface {
 	Body() io.ReadCloser
@@ -16,8 +15,4 @@ type RequestBody interface {
 
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
-}
-
-type statusHandler interface {
-	HandleError(response *http.Response) error
 }

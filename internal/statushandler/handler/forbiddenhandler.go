@@ -5,10 +5,10 @@ import (
 )
 
 type forbiddenHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewForbiddenHandler() StatusHandler {
+func NewForbiddenHandler() StatusErrorHandler {
 	return &forbiddenHandler{}
 }
 
@@ -19,6 +19,6 @@ func (f *forbiddenHandler) Execute(response *http.Response) error {
 	return f.next.Execute(response)
 }
 
-func (f *forbiddenHandler) SetNext(next StatusHandler) {
+func (f *forbiddenHandler) SetNext(next StatusErrorHandler) {
 	f.next = next
 }

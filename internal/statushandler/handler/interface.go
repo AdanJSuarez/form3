@@ -2,7 +2,9 @@ package handler
 
 import "net/http"
 
-type StatusHandler interface {
+//go:generate mockery --inpackage --name=statusHandler
+
+type StatusErrorHandler interface {
 	Execute(response *http.Response) error
-	SetNext(StatusHandler)
+	SetNext(StatusErrorHandler)
 }

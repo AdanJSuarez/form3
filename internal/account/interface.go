@@ -13,3 +13,10 @@ type Client interface {
 	Post(requestBody client.RequestBody) (*http.Response, error)
 	Delete(value, parameterKey, parameterValue string) (*http.Response, error)
 }
+
+type StatusHandler interface {
+	StatusCreated(response *http.Response) bool
+	StatusOK(response *http.Response) bool
+	StatusNotContent(response *http.Response) bool
+	HandleError(response *http.Response) error
+}

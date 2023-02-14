@@ -5,10 +5,10 @@ import (
 )
 
 type badRequestHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewBadRequestHandler() StatusHandler {
+func NewBadRequestHandler() StatusErrorHandler {
 	return &badRequestHandler{}
 }
 
@@ -19,6 +19,6 @@ func (b *badRequestHandler) Execute(response *http.Response) error {
 	return b.next.Execute(response)
 }
 
-func (b *badRequestHandler) SetNext(next StatusHandler) {
+func (b *badRequestHandler) SetNext(next StatusErrorHandler) {
 	b.next = next
 }

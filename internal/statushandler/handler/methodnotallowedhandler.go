@@ -8,10 +8,10 @@ import (
 const methodNotAllowedMessage = "trying to access an endpoint that exists using a method that is not supported by the target resource"
 
 type methodNotAllowedHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewMethodNotAllowedHandler() StatusHandler {
+func NewMethodNotAllowedHandler() StatusErrorHandler {
 	return &methodNotAllowedHandler{}
 }
 
@@ -22,6 +22,6 @@ func (m *methodNotAllowedHandler) Execute(response *http.Response) error {
 	return m.next.Execute(response)
 }
 
-func (m *methodNotAllowedHandler) SetNext(next StatusHandler) {
+func (m *methodNotAllowedHandler) SetNext(next StatusErrorHandler) {
 	m.next = next
 }

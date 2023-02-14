@@ -12,13 +12,9 @@ import (
 
 var emptyDataModel = model.DataModel{}
 
-type errorBadRequest struct {
-	Message string `json:"error_message"`
-	Code    string `json:"error_code"`
-}
-
 type Account struct {
-	client Client
+	client        Client
+	statusHandler StatusHandler
 }
 
 // New returns a pointer of Account initialized
@@ -39,8 +35,8 @@ func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
 	}
 	defer a.closeBody(response)
 
-	if !a.statusCreated(response) {
-		return emptyDataModel, fmt.Errorf("status code: %d", response.StatusCode)
+	if !a.isCreated(response) {
+		return emptyDataModel, a.statusHandler.HandleError(response)
 	}
 
 	return a.decodeResponse(response)
@@ -55,8 +51,8 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	}
 	defer a.closeBody(response)
 
-	if !a.statusOK(response) {
-		return emptyDataModel, fmt.Errorf("status code: %d", response.StatusCode)
+	if !a.isFetched(response) {
+		return emptyDataModel, a.statusHandler.HandleError(response)
 	}
 
 	return a.decodeResponse(response)
@@ -71,8 +67,8 @@ func (a *Account) Delete(accountID string, version int) error {
 	}
 	defer a.closeBody(response)
 
-	if !a.statusDeleted(response) {
-		return fmt.Errorf("status code: %d", response.StatusCode)
+	if !a.isDeleted(response) {
+		return a.statusHandler.HandleError(response)
 	}
 
 	return err
@@ -86,16 +82,16 @@ func (a *Account) decodeResponse(response *http.Response) (model.DataModel, erro
 	return *dataReturned, nil
 }
 
-func (a *Account) statusCreated(response *http.Response) bool {
-	return response.StatusCode == http.StatusCreated
+func (a *Account) isCreated(response *http.Response) bool {
+	return a.statusHandler.StatusCreated(response)
 }
 
-func (a *Account) statusOK(response *http.Response) bool {
-	return response.StatusCode == http.StatusOK
+func (a *Account) isFetched(response *http.Response) bool {
+	return a.statusHandler.StatusOK(response)
 }
 
-func (a *Account) statusDeleted(response *http.Response) bool {
-	return response.StatusCode == http.StatusNoContent
+func (a *Account) isDeleted(response *http.Response) bool {
+	return a.statusHandler.StatusNotContent(response)
 }
 
 func (a *Account) closeBody(response *http.Response) {

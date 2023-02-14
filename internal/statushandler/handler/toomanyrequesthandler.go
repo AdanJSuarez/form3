@@ -10,10 +10,10 @@ Also used in the Form3 Multi-Cloud stack when an attempted change involves a res
 Wait, then retry later`
 
 type tooManyRequestsHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewTooManyRequestsHandler() StatusHandler {
+func NewTooManyRequestsHandler() StatusErrorHandler {
 	return &tooManyRequestsHandler{}
 }
 
@@ -24,6 +24,6 @@ func (t *tooManyRequestsHandler) Execute(response *http.Response) error {
 	return t.next.Execute(response)
 }
 
-func (t *tooManyRequestsHandler) SetNext(next StatusHandler) {
+func (t *tooManyRequestsHandler) SetNext(next StatusErrorHandler) {
 	t.next = next
 }

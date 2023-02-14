@@ -8,10 +8,10 @@ import (
 const unauthorizedMessage = "invalid request signature or access token"
 
 type unauthorizedHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewUnauthorizedHandler() StatusHandler {
+func NewUnauthorizedHandler() StatusErrorHandler {
 	return &unauthorizedHandler{}
 }
 
@@ -22,6 +22,6 @@ func (u *unauthorizedHandler) Execute(response *http.Response) error {
 	return u.next.Execute(response)
 }
 
-func (u *unauthorizedHandler) SetNext(next StatusHandler) {
+func (u *unauthorizedHandler) SetNext(next StatusErrorHandler) {
 	u.next = next
 }

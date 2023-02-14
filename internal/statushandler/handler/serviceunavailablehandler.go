@@ -8,10 +8,10 @@ import (
 const serviceUnavailableMessage = "service is temporarily overloaded. This is safe to retry after waiting a short amount of time"
 
 type serviceUnavailableHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewServiceUnavailableHandler() StatusHandler {
+func NewServiceUnavailableHandler() StatusErrorHandler {
 	return &serviceUnavailableHandler{}
 }
 
@@ -22,6 +22,6 @@ func (s *serviceUnavailableHandler) Execute(response *http.Response) error {
 	return s.next.Execute(response)
 }
 
-func (s *serviceUnavailableHandler) SetNext(next StatusHandler) {
+func (s *serviceUnavailableHandler) SetNext(next StatusErrorHandler) {
 	s.next = next
 }

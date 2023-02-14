@@ -9,10 +9,10 @@ const conflictHandlerMessage = `resource has already been created. It is safe ig
 Returned for DELETE calls when an incorrect version has been specified`
 
 type conflictHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewConflictHandler() StatusHandler {
+func NewConflictHandler() StatusErrorHandler {
 	return &conflictHandler{}
 }
 
@@ -23,6 +23,6 @@ func (c *conflictHandler) Execute(response *http.Response) error {
 	return c.next.Execute(response)
 }
 
-func (c *conflictHandler) SetNext(next StatusHandler) {
+func (c *conflictHandler) SetNext(next StatusErrorHandler) {
 	c.next = next
 }

@@ -8,10 +8,10 @@ import (
 const notAcceptableMessage = "trying to access content with an incorrect content type specific in the request header"
 
 type notAcceptableHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewNotAcceptableHandler() StatusHandler {
+func NewNotAcceptableHandler() StatusErrorHandler {
 	return &notAcceptableHandler{}
 }
 
@@ -22,6 +22,6 @@ func (n *notAcceptableHandler) Execute(response *http.Response) error {
 	return n.next.Execute(response)
 }
 
-func (n *notAcceptableHandler) SetNext(next StatusHandler) {
+func (n *notAcceptableHandler) SetNext(next StatusErrorHandler) {
 	n.next = next
 }

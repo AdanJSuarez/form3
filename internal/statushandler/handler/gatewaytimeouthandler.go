@@ -8,10 +8,10 @@ import (
 const gatewayTimeoutMessage = "there is a temporary internal networking problem. This is safe to retry after waiting a short amount of time"
 
 type gatewayTimeoutHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewGatewayTimeoutHandler() StatusHandler {
+func NewGatewayTimeoutHandler() StatusErrorHandler {
 	return &gatewayTimeoutHandler{}
 }
 
@@ -22,6 +22,6 @@ func (g *gatewayTimeoutHandler) Execute(response *http.Response) error {
 	return g.next.Execute(response)
 }
 
-func (g *gatewayTimeoutHandler) SetNext(next StatusHandler) {
+func (g *gatewayTimeoutHandler) SetNext(next StatusErrorHandler) {
 	g.next = next
 }

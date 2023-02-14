@@ -8,10 +8,10 @@ import (
 const notFoundFmt = "not found: %s"
 
 type notFoundHandler struct {
-	next StatusHandler
+	next StatusErrorHandler
 }
 
-func NewNotFoundHandler() StatusHandler {
+func NewNotFoundHandler() StatusErrorHandler {
 	return &notFoundHandler{}
 }
 
@@ -25,6 +25,6 @@ func (n *notFoundHandler) Execute(response *http.Response) error {
 	return n.next.Execute(response)
 }
 
-func (n *notFoundHandler) SetNext(next StatusHandler) {
+func (n *notFoundHandler) SetNext(next StatusErrorHandler) {
 	n.next = next
 }
