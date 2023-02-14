@@ -12,13 +12,13 @@ func NewBadRequestHandler() StatusHandler {
 	return &badRequestHandler{}
 }
 
-func (s *badRequestHandler) Execute(response *http.Response) error {
+func (b *badRequestHandler) Execute(response *http.Response) error {
 	if response.StatusCode == http.StatusBadRequest {
 		return newCodeMessageError(response.StatusCode, response.Body)
 	}
-	return s.next.Execute(response)
+	return b.next.Execute(response)
 }
 
-func (s *badRequestHandler) SetNext(next StatusHandler) {
-	s.next = next
+func (b *badRequestHandler) SetNext(next StatusHandler) {
+	b.next = next
 }

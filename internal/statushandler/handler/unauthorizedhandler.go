@@ -5,8 +5,6 @@ import (
 	"net/http"
 )
 
-// Ref: https://refactoring.guru/design-patterns/chain-of-responsibility
-
 const unauthorizedMessage = "invalid request signature or access token"
 
 type unauthorizedHandler struct {
@@ -17,13 +15,13 @@ func NewUnauthorizedHandler() StatusHandler {
 	return &unauthorizedHandler{}
 }
 
-func (s *unauthorizedHandler) Execute(response *http.Response) error {
+func (u *unauthorizedHandler) Execute(response *http.Response) error {
 	if response.StatusCode == http.StatusUnauthorized {
 		return newError(response.StatusCode, fmt.Errorf(unauthorizedMessage))
 	}
-	return s.next.Execute(response)
+	return u.next.Execute(response)
 }
 
-func (s *unauthorizedHandler) SetNext(next StatusHandler) {
-	s.next = next
+func (u *unauthorizedHandler) SetNext(next StatusHandler) {
+	u.next = next
 }

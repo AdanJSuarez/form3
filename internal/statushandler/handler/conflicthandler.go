@@ -23,6 +23,6 @@ func (c *conflictHandler) Execute(response *http.Response) error {
 	return c.next.Execute(response)
 }
 
-func (s *conflictHandler) SetNext(next StatusHandler) {
-	s.next = next
+func (c *conflictHandler) SetNext(next StatusHandler) {
+	c.next = next
 }

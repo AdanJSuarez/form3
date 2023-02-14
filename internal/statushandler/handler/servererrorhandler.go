@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-const serverErrorMessage = `an internal error occurs or the request times out. This is safe to retry after waiting a short amount of time`
+const serverErrorMessage = "an internal error occurs or the request times out. This is safe to retry after waiting a short amount of time"
 
 type serverErrorHandler struct {
 	next StatusHandler

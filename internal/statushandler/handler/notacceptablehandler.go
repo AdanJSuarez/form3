@@ -15,13 +15,13 @@ func NewNotAcceptableHandler() StatusHandler {
 	return &notAcceptableHandler{}
 }
 
-func (s *notAcceptableHandler) Execute(response *http.Response) error {
+func (n *notAcceptableHandler) Execute(response *http.Response) error {
 	if response.StatusCode == http.StatusNotAcceptable {
 		return newError(response.StatusCode, fmt.Errorf(notAcceptableMessage))
 	}
-	return s.next.Execute(response)
+	return n.next.Execute(response)
 }
 
-func (s *notAcceptableHandler) SetNext(next StatusHandler) {
-	s.next = next
+func (n *notAcceptableHandler) SetNext(next StatusHandler) {
+	n.next = next
 }

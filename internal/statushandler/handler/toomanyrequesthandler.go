@@ -17,13 +17,13 @@ func NewTooManyRequestsHandler() StatusHandler {
 	return &tooManyRequestsHandler{}
 }
 
-func (c *tooManyRequestsHandler) Execute(response *http.Response) error {
+func (t *tooManyRequestsHandler) Execute(response *http.Response) error {
 	if response.StatusCode == http.StatusTooManyRequests {
 		return newError(response.StatusCode, fmt.Errorf(tooManyRequestsHandlerMessage))
 	}
-	return c.next.Execute(response)
+	return t.next.Execute(response)
 }
 
-func (s *tooManyRequestsHandler) SetNext(next StatusHandler) {
-	s.next = next
+func (t *tooManyRequestsHandler) SetNext(next StatusHandler) {
+	t.next = next
 }
