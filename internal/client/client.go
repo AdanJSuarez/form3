@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/AdanJSuarez/form3/internal/client/requestbody"
 )
 
 const (
@@ -28,8 +30,8 @@ const (
 )
 
 type Client struct {
-	clientURL url.URL
-	client    httpClient
+	clientURL  url.URL
+	httpClient httpClient
 }
 
 func New(clientURL url.URL) *Client {
@@ -37,9 +39,13 @@ func New(clientURL url.URL) *Client {
 		Timeout: timeout,
 	}
 	return &Client{
-		clientURL: clientURL,
-		client:    client,
+		clientURL:  clientURL,
+		httpClient: client,
 	}
+}
+
+func NewRequestBody(data interface{}) RequestBody {
+	return requestbody.NewRequestBody(data)
 }
 
 func (c *Client) Get(value string) (*http.Response, error) {
@@ -48,7 +54,7 @@ func (c *Client) Get(value string) (*http.Response, error) {
 		return nil, err
 	}
 
-	request, err := c.request(GET, url, NewRequestBody(nil))
+	request, err := c.request(GET, url, requestbody.NewRequestBody(nil))
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +116,7 @@ func (c *Client) request(method string, url string, requestBody RequestBody) (*h
 
 func (c *Client) doRequest(request *http.Request) (*http.Response, error) {
 	emptyResponse := &http.Response{}
-	response, err := c.client.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return emptyResponse, err
 	}
@@ -133,6 +139,8 @@ func (c *Client) setQuery(request *http.Request, parameterKey, parameterValue st
 	query.Add(parameterKey, parameterValue)
 	request.URL.RawQuery = query.Encode()
 }
+
+//TODO: Include header with "gzip"
 
 func (c *Client) addRequiredHeader(request *http.Request) {
 	request.Header.Add(HOST_KEY, c.clientURL.Host)

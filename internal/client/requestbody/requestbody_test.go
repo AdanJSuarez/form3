@@ -1,4 +1,4 @@
-package client
+package requestbody
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	requestBodyTest RequestBody
+	requestBodyTest *RequestBody
 	dataByteTest, _ = json.Marshal(rbDataTest)
 	bodyTest        = io.NopCloser(bytes.NewBuffer(dataByteTest))
 )
@@ -28,7 +28,7 @@ func TestRunTSRequestBody(t *testing.T) {
 
 func (ts *TSRequestBody) BeforeTest(_, _ string) {
 	requestBodyTest = NewRequestBody(rbDataTest)
-	ts.IsType(RequestBody{}, requestBodyTest)
+	ts.IsType(&RequestBody{}, requestBodyTest)
 }
 
 func (ts *TSRequestBody) TestBody() {

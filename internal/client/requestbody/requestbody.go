@@ -1,4 +1,4 @@
-package client
+package requestbody
 
 import (
 	"bytes"
@@ -18,8 +18,8 @@ type RequestBody struct {
 	digest string
 }
 
-func NewRequestBody(data interface{}) RequestBody {
-	rb := RequestBody{}
+func NewRequestBody(data interface{}) *RequestBody {
+	rb := &RequestBody{}
 	if data == nil {
 		return rb
 	}

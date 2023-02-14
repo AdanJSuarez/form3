@@ -12,6 +12,11 @@ import (
 
 var emptyDataModel = model.DataModel{}
 
+type errorBadRequest struct {
+	Message string `json:"error_message"`
+	Code    string `json:"error_code"`
+}
+
 type Account struct {
 	client Client
 }
@@ -50,7 +55,7 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	}
 	defer a.closeBody(response)
 
-	if !a.statusSuccess(response) {
+	if !a.statusOK(response) {
 		return emptyDataModel, fmt.Errorf("status code: %d", response.StatusCode)
 	}
 
@@ -85,7 +90,7 @@ func (a *Account) statusCreated(response *http.Response) bool {
 	return response.StatusCode == http.StatusCreated
 }
 
-func (a *Account) statusSuccess(response *http.Response) bool {
+func (a *Account) statusOK(response *http.Response) bool {
 	return response.StatusCode == http.StatusOK
 }
 
@@ -98,3 +103,18 @@ func (a *Account) closeBody(response *http.Response) {
 		response.Body.Close()
 	}
 }
+
+// // TODO: Handle different Status code
+
+// func (a *Account) handleBadRequest(response *http.Response) error {
+// 	badRequest := "status code 400: %v"
+// 	if response.StatusCode == http.StatusBadRequest {
+// 		dataReturned := errorBadRequest{}
+// 		if err := json.NewDecoder(response.Body).Decode(&dataReturned); err != nil {
+// 			return fmt.Errorf(badRequest, err)
+// 		}
+// 		messageCode := fmt.Sprintf("%s:%s", dataReturned.Message, dataReturned.Code)
+// 		return fmt.Errorf(badRequest, messageCode)
+// 	}
+// 	return nil
+// }

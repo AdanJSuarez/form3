@@ -16,7 +16,7 @@ const (
 	healthCheckNumOfTries = 5
 	healthCheckInterval   = 5 * time.Second
 	organizationID        = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	localhostURL          = "http://accountapi:8080"
+	accountAPIURL         = "http://localhost:8080"
 	accountPath           = "/v1/organisation/accounts"
 )
 
@@ -41,9 +41,9 @@ var (
 			},
 		},
 	}
-	linksTest = model.Links{
-		Self: accountPath + "/" + jitUUID,
-	}
+	// linksTest = model.Links{
+	// 	Self: accountPath + "/" + jitUUID,
+	// }
 )
 
 type TSIntegration struct{ suite.Suite }
@@ -58,7 +58,7 @@ func (ts *TSIntegration) SetupSuite() {
 
 func (ts *TSIntegration) BeforeTest(_, _ string) {
 	f3Test = form3.New()
-	if err := f3Test.ConfigurationByValue(localhostURL, accountPath); err != nil {
+	if err := f3Test.ConfigurationByValue(accountAPIURL, accountPath); err != nil {
 		log.Printf("Error on ConfigurationByValue: %v", err)
 		return
 	}
@@ -75,13 +75,22 @@ func (ts *TSIntegration) AfterTest(_, _ string) {
 
 func (ts *TSIntegration) TestCreateAccount() {
 	data, err := accountTest.Create(dataModelTest)
-	dataModelTest.Links = linksTest
 	ts.NoError(err)
 	ts.Equal(dataModelTest, data)
 }
 
-func (ts *TSIntegration) TestThrottling() {
-	// TODO: Implement TestThrottling
+func (ts *TSIntegration) TestEmptyDataCreateAccount() {
+	data, err := accountTest.Create(model.DataModel{})
+	ts.ErrorContains(err, "status code 400: validation failure list:\nvalidation failure list:\nvalidation failure list:")
+	ts.Empty(data)
+}
+
+func (ts *TSIntegration) TestCreateAccountSameUUID() {
+	dataModelTest.Data.ID = generateUUID()
+	_, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	_, err = accountTest.Create(dataModelTest)
+	ts.ErrorContains(err, "status code: 409")
 }
 
 func (ts *TSIntegration) startHealthCheck() {
@@ -96,7 +105,7 @@ func (ts *TSIntegration) startHealthCheck() {
 }
 
 func (ts *TSIntegration) getRequest() bool {
-	stringConnection := localhostURL + "/v1/health"
+	stringConnection := accountAPIURL + "/v1/health"
 	_, err := http.Get(stringConnection)
 	if err != nil {
 		log.Printf("error on health-check: %v", err)

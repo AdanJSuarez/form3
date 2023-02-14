@@ -43,3 +43,6 @@ This blog post talk about this... and he is a big fun btw :) [link](https://blog
 
 ## Network
 https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach
+
+## Requirement for different method:
+- Create: id, organisation_id, type(optional), attribute(base_currency, country)
