@@ -1,12 +1,15 @@
 package statushandler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/AdanJSuarez/form3/internal/statushandler/handler"
 )
 
 // Ref: https://refactoring.guru/design-patterns/chain-of-responsibility
+
+const nilResponseError = "http response is nil"
 
 type StatusHandler struct {
 	next handler.StatusErrorHandler
@@ -21,18 +24,30 @@ func NewStatusHandler() *StatusHandler {
 }
 
 func (s *StatusHandler) StatusCreated(response *http.Response) bool {
+	if response == nil {
+		return false
+	}
 	return response.StatusCode == http.StatusCreated
 }
 
 func (s *StatusHandler) StatusOK(response *http.Response) bool {
+	if response == nil {
+		return false
+	}
 	return response.StatusCode == http.StatusOK
 }
 
-func (s *StatusHandler) StatusNotContent(response *http.Response) bool {
+func (s *StatusHandler) StatusNoContent(response *http.Response) bool {
+	if response == nil {
+		return false
+	}
 	return response.StatusCode == http.StatusNoContent
 }
 
 func (s *StatusHandler) HandleError(response *http.Response) error {
+	if response == nil {
+		return fmt.Errorf(nilResponseError)
+	}
 	return s.next.Execute(response)
 }
 

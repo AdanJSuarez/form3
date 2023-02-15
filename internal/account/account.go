@@ -1,12 +1,12 @@
 package account
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 
 	"github.com/AdanJSuarez/form3/internal/client"
+	"github.com/AdanJSuarez/form3/internal/statushandler"
 	"github.com/AdanJSuarez/form3/pkg/model"
 )
 
@@ -21,7 +21,8 @@ type Account struct {
 func New(baseURL url.URL, accountPath string) *Account {
 	baseURL.Path = accountPath
 	return &Account{
-		client: client.New(baseURL),
+		client:        client.New(baseURL),
+		statusHandler: statushandler.NewStatusHandler(),
 	}
 }
 
@@ -75,11 +76,11 @@ func (a *Account) Delete(accountID string, version int) error {
 }
 
 func (a *Account) decodeResponse(response *http.Response) (model.DataModel, error) {
-	dataReturned := &model.DataModel{}
-	if err := json.NewDecoder(response.Body).Decode(dataReturned); err != nil {
-		return emptyDataModel, err
+	dataModel := model.DataModel{}
+	if err := dataModel.Unmarshal(response.Body); err != nil {
+		return dataModel, err
 	}
-	return *dataReturned, nil
+	return dataModel, nil
 }
 
 func (a *Account) isCreated(response *http.Response) bool {
@@ -91,26 +92,11 @@ func (a *Account) isFetched(response *http.Response) bool {
 }
 
 func (a *Account) isDeleted(response *http.Response) bool {
-	return a.statusHandler.StatusNotContent(response)
+	return a.statusHandler.StatusNoContent(response)
 }
 
 func (a *Account) closeBody(response *http.Response) {
-	if response.Body != nil {
+	if response != nil && response.Body != nil {
 		response.Body.Close()
 	}
 }
-
-// // TODO: Handle different Status code
-
-// func (a *Account) handleBadRequest(response *http.Response) error {
-// 	badRequest := "status code 400: %v"
-// 	if response.StatusCode == http.StatusBadRequest {
-// 		dataReturned := errorBadRequest{}
-// 		if err := json.NewDecoder(response.Body).Decode(&dataReturned); err != nil {
-// 			return fmt.Errorf(badRequest, err)
-// 		}
-// 		messageCode := fmt.Sprintf("%s:%s", dataReturned.Message, dataReturned.Code)
-// 		return fmt.Errorf(badRequest, messageCode)
-// 	}
-// 	return nil
-// }

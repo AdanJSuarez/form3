@@ -1,6 +1,7 @@
 package account
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
@@ -21,6 +22,7 @@ const (
 var (
 	accountTest        *Account
 	clientMock         *MockClient
+	statusHandlerMock  *MockStatusHandler
 	baseURLTest, _     = url.Parse(baseURL)
 	dataAttributesTest = model.Attributes{
 		Country:      "GB",
@@ -55,6 +57,7 @@ func (ts *TSAccount) BeforeTest(_, _ string) {
 	accountTest = New(*baseURLTest, accountPath)
 	ts.IsType(new(Account), accountTest)
 	clientMock = new(MockClient)
+	statusHandlerMock = new(MockStatusHandler)
 }
 
 func (ts *TSAccount) TestCreateValidDataModel() {
@@ -64,7 +67,10 @@ func (ts *TSAccount) TestCreateValidDataModel() {
 		Body:       req.Body(),
 	}
 	clientMock.On("Post", mock.Anything).Return(res, nil)
+	statusHandlerMock.On("StatusCreated", mock.AnythingOfType("*http.Response")).Return(true)
 	accountTest.client = clientMock
+	accountTest.statusHandler = statusHandlerMock
+
 	data, err := accountTest.Create(dataModelRequest)
 	ts.NoError(err)
 	ts.Equal(dataModelResponse, data)
@@ -76,20 +82,20 @@ func (ts *TSAccount) TestCreateInvalidDataModel() {
 		Body:       nil,
 	}
 	clientMock.On("Post", mock.Anything).Return(res, nil)
+	statusHandlerMock.On("StatusCreated", mock.AnythingOfType("*http.Response")).Return(false)
+	statusHandlerMock.On("HandleError", mock.AnythingOfType("*http.Response")).Return(fmt.Errorf("status code 400: fakeError"))
 	accountTest.client = clientMock
+	accountTest.statusHandler = statusHandlerMock
+
 	data, err := accountTest.Create(model.DataModel{})
-	ts.Error(err)
-	ts.Equal(model.DataModel{}, data)
+	ts.ErrorContains(err, "status code 400:")
+	ts.Empty(data)
 }
 
-func (ts *TSAccount) TestCreateInvalidSameID() {
-	res := &http.Response{
-		StatusCode: 409,
-		Body:       nil,
-	}
-	clientMock.On("Post", mock.Anything).Return(res, nil)
+func (ts *TSAccount) TestCreateNilResponse() {
+	clientMock.On("Post", mock.Anything).Return(nil, fmt.Errorf("fakeError"))
 	accountTest.client = clientMock
-	data, err := accountTest.Create(model.DataModel{})
-	ts.ErrorContains(err, "status code: 409")
-	ts.Equal(model.DataModel{}, data)
+	data, err := accountTest.Create(dataModelRequest)
+	ts.ErrorContains(err, "fakeError")
+	ts.Empty(data)
 }
