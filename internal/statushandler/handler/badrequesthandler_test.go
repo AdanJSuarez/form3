@@ -18,7 +18,7 @@ var (
 		Body:       io.NopCloser(bytes.NewBuffer([]byte(data1))),
 	}
 	responseFake2 = &http.Response{
-		StatusCode: 600,
+		StatusCode: 602,
 	}
 )
 
@@ -43,5 +43,6 @@ func (ts *TSBadRequestHandler) TestBadRequest() {
 
 func (ts *TSBadRequestHandler) TestNotBadRequest() {
 	err := badRequest.Execute(responseFake2)
+	ts.ErrorContains(err, "status code 602:")
 	ts.ErrorContains(err, uncoveredMessage)
 }

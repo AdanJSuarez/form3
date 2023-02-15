@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-const notFoundFmt = "not found: %s"
+const notFoundMessage = "not found: trying to access a non-existent endpoint or resource. Returned in some APIs when a queried parameter cannot be found"
 
 type notFoundHandler struct {
 	next StatusErrorHandler
@@ -17,10 +17,7 @@ func NewNotFoundHandler() StatusErrorHandler {
 
 func (n *notFoundHandler) Execute(response *http.Response) error {
 	if response.StatusCode == http.StatusNotFound {
-		// TODO: Check message returned and the right and set the right message returned. It looks like it returns html message.
-		b := []byte{}
-		response.Body.Read(b)
-		return fmt.Errorf(notFoundFmt, b)
+		return newError(response.StatusCode, fmt.Errorf(notFoundMessage))
 	}
 	return n.next.Execute(response)
 }

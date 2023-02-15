@@ -21,7 +21,7 @@ var (
 		Body:       io.NopCloser(bytes.NewBuffer([]byte(dataTypeDescription2))),
 	}
 	responseFake4 = &http.Response{
-		StatusCode: 600,
+		StatusCode: 604,
 	}
 )
 
@@ -46,6 +46,6 @@ func (ts *TSForbiddenHandler) TestForbiddenResponse() {
 
 func (ts *TSForbiddenHandler) TestNotForbiddenResponse() {
 	err := forbidden.Execute(responseFake4)
-	ts.ErrorContains(err, "status code 600:")
+	ts.ErrorContains(err, "status code 604:")
 	ts.ErrorContains(err, uncoveredMessage)
 }

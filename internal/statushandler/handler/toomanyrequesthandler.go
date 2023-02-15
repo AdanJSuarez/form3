@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-const tooManyRequestsHandlerMessage = `the rate limit for requests per second has been exceeded.
+const tooManyRequestsMessage = `the rate limit for requests per second has been exceeded.
 Also used in the Form3 Multi-Cloud stack when an attempted change involves a resource whose state is still being synchronised across the stack.
 Wait, then retry later`
 
@@ -19,7 +19,7 @@ func NewTooManyRequestsHandler() StatusErrorHandler {
 
 func (t *tooManyRequestsHandler) Execute(response *http.Response) error {
 	if response.StatusCode == http.StatusTooManyRequests {
-		return newError(response.StatusCode, fmt.Errorf(tooManyRequestsHandlerMessage))
+		return newError(response.StatusCode, fmt.Errorf(tooManyRequestsMessage))
 	}
 	return t.next.Execute(response)
 }

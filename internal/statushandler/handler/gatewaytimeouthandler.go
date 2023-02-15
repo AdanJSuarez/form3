@@ -16,7 +16,7 @@ func NewGatewayTimeoutHandler() StatusErrorHandler {
 }
 
 func (g *gatewayTimeoutHandler) Execute(response *http.Response) error {
-	if response.StatusCode == http.StatusUnauthorized {
+	if response.StatusCode == http.StatusGatewayTimeout {
 		return newError(response.StatusCode, fmt.Errorf(gatewayTimeoutMessage))
 	}
 	return g.next.Execute(response)

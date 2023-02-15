@@ -13,7 +13,7 @@ var (
 		StatusCode: http.StatusBadGateway,
 	}
 	responseFake1 = &http.Response{
-		StatusCode: 600,
+		StatusCode: 601,
 	}
 )
 
@@ -37,5 +37,6 @@ func (ts *TSBadGatewayHandler) TestBadGatewayResponse() {
 
 func (ts *TSBadGatewayHandler) TestNotABadGatewayResponse() {
 	err := badGateway.Execute(responseFake1)
+	ts.ErrorContains(err, "status code 601")
 	ts.ErrorContains(err, uncoveredMessage)
 }

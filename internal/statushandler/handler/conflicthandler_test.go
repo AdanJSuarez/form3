@@ -13,7 +13,7 @@ var (
 		StatusCode: http.StatusConflict,
 	}
 	responseFake3 = &http.Response{
-		StatusCode: 600,
+		StatusCode: 603,
 	}
 )
 
@@ -37,6 +37,6 @@ func (ts *TSConflictHandler) TestConflictResponse() {
 
 func (ts *TSConflictHandler) TestNotConflictResponse() {
 	err := conflict.Execute(responseFake3)
-	ts.ErrorContains(err, "status code 600:")
+	ts.ErrorContains(err, "status code 603:")
 	ts.ErrorContains(err, uncoveredMessage)
 }

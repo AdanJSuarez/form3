@@ -1,9 +1,20 @@
 package handler
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+)
+
+var (
+	uncovered  StatusErrorHandler
+	responseOK = &http.Response{
+		StatusCode: http.StatusOK,
+	}
+	responseFake13 = &http.Response{
+		StatusCode: 613,
+	}
 )
 
 type TSUncoveredHandler struct{ suite.Suite }
@@ -13,5 +24,17 @@ func TestRunUncoveredSuite(t *testing.T) {
 }
 
 func (ts *TSUncoveredHandler) BeforeTest(_, _ string) {
-	// TODO
+	uncovered = NewUncoveredHandler()
+}
+
+func (ts *TSUncoveredHandler) TestNotUncoveredResponse() {
+	err := uncovered.Execute(responseOK)
+	ts.ErrorContains(err, "status code 200:")
+	ts.ErrorContains(err, uncoveredMessage)
+}
+
+func (ts *TSUncoveredHandler) TestUncoveredResponse() {
+	err := uncovered.Execute(responseFake13)
+	ts.ErrorContains(err, "status code 613:")
+	ts.ErrorContains(err, uncoveredMessage)
 }
