@@ -1,6 +1,7 @@
 package account
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -9,6 +10,8 @@ import (
 	"github.com/AdanJSuarez/form3/internal/statushandler"
 	"github.com/AdanJSuarez/form3/pkg/model"
 )
+
+const httpResponseNilError = "http response is nil"
 
 var emptyDataModel = model.DataModel{}
 
@@ -26,8 +29,6 @@ func New(baseURL url.URL, accountPath string) *Account {
 	}
 }
 
-// Create creates an bank account and returns the account values.
-// It returns an error otherwise.
 func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
 	dataBody := client.NewRequestBody(data)
 	response, err := a.client.Post(dataBody)
@@ -43,8 +44,6 @@ func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
 	return a.decodeResponse(response)
 }
 
-// Fetch retrieves the account information for the specific account ID.
-// It returns an error otherwise.
 func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	response, err := a.client.Get(accountID)
 	if err != nil {
@@ -59,8 +58,6 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	return a.decodeResponse(response)
 }
 
-// Delete deletes an account by its ID and version number.
-// It returns an error otherwise.
 func (a *Account) Delete(accountID string, version int) error {
 	response, err := a.client.Delete(accountID, "version", fmt.Sprint(version))
 	if err != nil {
@@ -77,7 +74,10 @@ func (a *Account) Delete(accountID string, version int) error {
 
 func (a *Account) decodeResponse(response *http.Response) (model.DataModel, error) {
 	dataModel := model.DataModel{}
-	if err := dataModel.Unmarshal(response.Body); err != nil {
+	if response == nil {
+		return dataModel, fmt.Errorf(httpResponseNilError)
+	}
+	if err := json.NewDecoder(response.Body).Decode(&dataModel); err != nil {
 		return dataModel, err
 	}
 	return dataModel, nil
