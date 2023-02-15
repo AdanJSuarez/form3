@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-const badGatewayMessage = "here is a temporary internal networking problem. This is safe to retry after waiting a short amount of time"
+const badGatewayMessage = "there is a temporary internal networking problem. This is safe to retry after waiting a short amount of time"
 
 type badGatewayHandler struct {
 	next StatusErrorHandler

@@ -6,7 +6,11 @@ import (
 	"io"
 )
 
-const errorFmt = "status code %d: %v"
+const (
+	errorFmt                = "status code %d: %v"
+	errorCodeMessageFmt     = "errorCode: %s - errorMessage: %s"
+	errorTypeDescriptionFmt = "error: %s - errorDescription: %s"
+)
 
 type errorCodeMessage struct {
 	Message string `json:"error_message"`
@@ -27,7 +31,7 @@ func newTypeDescriptionError(statusCode int, body io.ReadCloser) error {
 	if err := json.NewDecoder(body).Decode(&dataReturned); err != nil {
 		return fmt.Errorf(errorFmt, statusCode, err)
 	}
-	messageCode := fmt.Sprintf("%s:%s", dataReturned.ErrorType, dataReturned.ErrorDescription)
+	messageCode := fmt.Sprintf(errorTypeDescriptionFmt, dataReturned.ErrorType, dataReturned.ErrorDescription)
 	return fmt.Errorf(errorFmt, statusCode, messageCode)
 }
 
@@ -36,6 +40,6 @@ func newCodeMessageError(statusCode int, body io.ReadCloser) error {
 	if err := json.NewDecoder(body).Decode(&dataReturned); err != nil {
 		return fmt.Errorf(errorFmt, statusCode, err)
 	}
-	messageCode := fmt.Sprintf("%s:%s", dataReturned.Code, dataReturned.Message)
+	messageCode := fmt.Sprintf(errorCodeMessageFmt, dataReturned.Code, dataReturned.Message)
 	return fmt.Errorf(errorFmt, statusCode, messageCode)
 }
