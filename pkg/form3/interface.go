@@ -1,8 +1,6 @@
 package form3
 
 import (
-	"net/url"
-
 	"github.com/AdanJSuarez/form3/pkg/model"
 )
 
@@ -19,12 +17,4 @@ type Account interface {
 	// Delete deletes an account by its ID and version number.
 	// It returns an error otherwise.
 	Delete(accountID string, version int) error
-}
-
-type f3Configuration interface {
-	BaseURL() *url.URL
-	AccountPath() string
-	InitializeByValue(rawBaseURL, accountPath string) error
-	InitializeByYaml() error
-	InitializeByEnv() error
 }

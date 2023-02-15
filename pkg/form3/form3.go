@@ -2,11 +2,11 @@ package form3
 
 import (
 	"github.com/AdanJSuarez/form3/internal/account"
-	"github.com/AdanJSuarez/form3/internal/configuration"
+	"github.com/AdanJSuarez/form3/pkg/form3/configuration"
 )
 
 type Form3 struct {
-	configuration f3Configuration
+	configuration configuration.Configuration
 	account       Account
 }
 

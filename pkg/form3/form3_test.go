@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/AdanJSuarez/form3/pkg/form3/configuration"
 	"github.com/AdanJSuarez/form3/pkg/model"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -37,6 +38,7 @@ var (
 			},
 		},
 	}
+	mockConfiguration *configuration.MockConfiguration
 )
 
 type TSForm3 struct{ suite.Suite }
@@ -46,10 +48,7 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSForm3) BeforeTest(_, _ string) {
-	mockConfiguration := new(mockF3Configuration)
-	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
-	mockConfiguration.On("AccountPath").Return(accountPath)
-	mockConfiguration.On("BaseURL").Return(baseURLTest)
+	mockConfiguration = new(configuration.MockConfiguration)
 	form3Test = New()
 	ts.IsType(new(Form3), form3Test)
 	form3Test.configuration = mockConfiguration
@@ -64,16 +63,20 @@ func (ts *TSForm3) TestValidConfigurationNotNil() {
 }
 
 func (ts *TSForm3) TestInvalidConfiguration() {
-	mockConfiguration := new(mockF3Configuration)
 	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"),
 		mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(fmt.Errorf("fake error"))
 	f3Test := New()
 	f3Test.configuration = mockConfiguration
+
 	err = f3Test.ConfigurationByValue(rawBaseURLTest, accountPath)
 	ts.Error(err)
 }
 
 func (ts *TSForm3) TestValidAccountObject() {
+	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
+	mockConfiguration.On("AccountPath").Return(accountPath)
+	mockConfiguration.On("BaseURL").Return(baseURLTest)
+
 	err = form3Test.ConfigurationByValue("fakeURL", accountPath)
 	ts.Nil(err)
 	account := form3Test.Account()
@@ -81,57 +84,57 @@ func (ts *TSForm3) TestValidAccountObject() {
 }
 
 func (ts *TSForm3) TestInvalidAccountObject() {
-	mockConfiguration := new(mockF3Configuration)
 	mockConfiguration.On("InitializeByValue", mock.AnythingOfType("string"),
 		mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(fmt.Errorf("fake error"))
 	f3Test := New()
 	f3Test.configuration = mockConfiguration
+
 	err = f3Test.ConfigurationByValue(rawBaseURLTest, accountPath)
 	ts.NotNil(err)
 	ts.Nil(f3Test.Account())
 }
 
 func (ts *TSForm3) TestInvalidConfigurationByYaml() {
-	mockConfiguration := new(mockF3Configuration)
 	mockConfiguration.On("InitializeByYaml").Return(fmt.Errorf("not implemented"))
 	mockConfiguration.On("AccountPath", mock.Anything).Return(accountPath)
 	mockConfiguration.On("BaseURL", mock.Anything).Return(baseURLTest)
 	form3Test = New()
 	form3Test.configuration = mockConfiguration
+
 	err := form3Test.ConfigurationByYaml()
 	ts.NotNil(err)
 }
 
 func (ts *TSForm3) TestValidConfigurationByYaml() {
-	mockConfiguration := new(mockF3Configuration)
 	mockConfiguration.On("InitializeByYaml").Return(nil)
 	mockConfiguration.On("AccountPath", mock.Anything).Return(accountPath)
 	mockConfiguration.On("BaseURL", mock.Anything).Return(baseURLTest)
 	form3Test = New()
 	form3Test.configuration = mockConfiguration
+
 	err := form3Test.ConfigurationByYaml()
 	ts.Nil(err)
 	ts.NotEmpty(form3Test.Account())
 }
 
 func (ts *TSForm3) TestInvalidConfigurationByEnv() {
-	mockConfiguration := new(mockF3Configuration)
 	mockConfiguration.On("InitializeByEnv").Return(fmt.Errorf("not implemented"))
 	mockConfiguration.On("AccountPath", mock.Anything).Return(accountPath)
 	mockConfiguration.On("BaseURL", mock.Anything).Return(baseURLTest)
 	form3Test = New()
 	form3Test.configuration = mockConfiguration
+
 	err := form3Test.ConfigurationByEnv()
 	ts.NotNil(err)
 }
 
 func (ts *TSForm3) TestValidConfigurationByEnv() {
-	mockConfiguration := new(mockF3Configuration)
 	mockConfiguration.On("InitializeByEnv").Return(nil)
 	mockConfiguration.On("AccountPath", mock.Anything).Return(accountPath)
 	mockConfiguration.On("BaseURL", mock.Anything).Return(baseURLTest)
 	form3Test = New()
 	form3Test.configuration = mockConfiguration
+
 	err := form3Test.ConfigurationByEnv()
 	ts.Nil(err)
 	ts.NotEmpty(form3Test.Account())

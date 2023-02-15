@@ -15,7 +15,7 @@ const (
 	organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
 )
 
-var configurationTest *Configuration
+var configurationTest *configuration
 
 type TSConfiguration struct{ suite.Suite }
 
@@ -24,8 +24,7 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSConfiguration) BeforeTest(_, _ string) {
-	configurationTest = New()
-	ts.IsType(new(Configuration), configurationTest)
+	configurationTest = &configuration{}
 }
 
 func (ts *TSConfiguration) TestValidInitializeByValue() {
