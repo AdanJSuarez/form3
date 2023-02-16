@@ -39,6 +39,7 @@ var (
 		},
 	}
 	mockConfiguration *configuration.MockConfiguration
+	mockAccount       *MockAccount
 )
 
 type TSForm3 struct{ suite.Suite }
@@ -49,9 +50,11 @@ func TestRunSuite(t *testing.T) {
 
 func (ts *TSForm3) BeforeTest(_, _ string) {
 	mockConfiguration = new(configuration.MockConfiguration)
+	mockAccount = new(MockAccount)
 	form3Test = New()
 	ts.IsType(new(Form3), form3Test)
 	form3Test.configuration = mockConfiguration
+	form3Test.account = mockAccount
 }
 
 func (ts *TSForm3) TestValidConfiguration() {
@@ -139,3 +142,21 @@ func (ts *TSForm3) TestValidConfigurationByEnv() {
 	ts.Nil(err)
 	ts.NotEmpty(form3Test.Account())
 }
+
+func (ts *TSForm3) TestCreateAccount() {
+	mockAccount.On("Create", mock.Anything).Return(dataTest1, nil)
+	account := form3Test.Account()
+	data, err := account.Create(model.DataModel{})
+	ts.NoError(err)
+	ts.Equal(dataTest1, data)
+}
+
+func (ts *TSForm3) TestCreateAccountError() {
+	mockAccount.On("Create", mock.Anything).Return(model.DataModel{}, fmt.Errorf("fakeError"))
+	account := form3Test.Account()
+	data, err := account.Create(model.DataModel{})
+	ts.Error(err)
+	ts.Empty(data)
+}
+
+// func (ts *TSForm3) Test

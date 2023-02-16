@@ -23,9 +23,11 @@ rmmock:
 
 .PHONY: test
 test:
-	@echo "==> Running Unit Tests 🇨🇦 <=="
-	go test ./pkg/...
-	go test ./internal/...
+	@echo "==> Running Unit Tests 🎮 <=="
+	go test ./pkg/... -cover
+	go test ./internal/... -cover
+	# go tool cover -html=coverage.out -o coverage.html
+	# go tool cover -html=coverageinternal.out -o coverageinternal.html
 
 .PHONY: testmock
 testmock:
@@ -33,15 +35,9 @@ testmock:
 	make mock
 	make test
 
-.PHONY: coverage
-ut-coverage:
-	@echo "==> Running Unit Test with coverage 🎮 <=="
-	# TODO: run unit test with coverage
-
 .PHONY: integration
 integration:
 	@echo "==> Running Integration Test 🎵 <=="
-	# TODO: run integration test. Include dependencies for docker-compose.
 	go test ./integration
 
 .PHONE: clean

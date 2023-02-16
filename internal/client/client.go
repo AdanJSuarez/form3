@@ -16,13 +16,15 @@ const (
 )
 
 const (
-	HOST_KEY           = "Host"
-	DATE_KEY           = "Date"
-	ACCEPT_KEY         = "Accept"
-	CONTENT_TYPE_KEY   = "Content-Type"
-	CONTENT_LENGTH_KEY = "Content-Length"
-	DIGEST_KEY         = "Digest"
-	CONTENT_TYPE_VALUE = "application/vnd.api+json"
+	HOST_KEY              = "Host"
+	DATE_KEY              = "Date"
+	ACCEPT_KEY            = "Accept"
+	ACCEPT_ENCODING_KEY   = "Accept-Encoding"
+	CONTENT_TYPE_KEY      = "Content-Type"
+	CONTENT_LENGTH_KEY    = "Content-Length"
+	DIGEST_KEY            = "Digest"
+	CONTENT_TYPE_VALUE    = "application/vnd.api+json"
+	ACCEPT_ENCODING_VALUE = "gzip"
 )
 
 const (
@@ -140,12 +142,11 @@ func (c *Client) setQuery(request *http.Request, parameterKey, parameterValue st
 	request.URL.RawQuery = query.Encode()
 }
 
-//TODO: Include header with "gzip"
-
 func (c *Client) addRequiredHeader(request *http.Request) {
 	request.Header.Add(HOST_KEY, c.clientURL.Host)
 	request.Header.Add(DATE_KEY, time.Now().Format(time.RFC1123))
 	request.Header.Add(ACCEPT_KEY, CONTENT_TYPE_VALUE)
+	request.Header.Add(ACCEPT_ENCODING_KEY, ACCEPT_ENCODING_VALUE)
 }
 
 func (c *Client) addHeaderToRequestWithBody(request *http.Request, size int, desire string) {

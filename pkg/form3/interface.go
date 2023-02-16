@@ -5,7 +5,6 @@ import (
 )
 
 //go:generate mockery --inpackage --name=Account
-//go:generate mockery --inpackage --name=f3Configuration
 
 type Account interface {
 	// Create creates an bank account and returns the account values.

@@ -27,6 +27,11 @@ func (ts *TSConfiguration) BeforeTest(_, _ string) {
 	configurationTest = &configuration{}
 }
 
+func (ts *TSConfiguration) TestNewType() {
+	config := New()
+	ts.IsType(new(configuration), config)
+}
+
 func (ts *TSConfiguration) TestValidInitializeByValue() {
 	err := configurationTest.InitializeByValue(rawBaseURL, accountPath)
 	ts.NoError(err)
@@ -43,19 +48,19 @@ func (ts *TSConfiguration) TestInvalidInitializeByValue() {
 
 func (ts *TSConfiguration) TestInvalidBaseURL1() {
 	url, err := configurationTest.parseRawBaseURL(invalidURL1)
-	ts.Error(err)
+	ts.ErrorContains(err, "failed parsing rawBaseURL:")
 	ts.Nil(url)
 }
 
 func (ts *TSConfiguration) TestInvalidBaseURL2() {
 	url, err := configurationTest.parseRawBaseURL(invalidURL2)
-	ts.Error(err)
+	ts.ErrorContains(err, "failed parsing rawBaseURL:")
 	ts.Nil(url)
 }
 
 func (ts *TSConfiguration) TestInvalidBaseURL3() {
 	url, err := configurationTest.parseRawBaseURL(invalidURL3)
-	ts.Error(err)
+	ts.ErrorContains(err, "failed parsing rawBaseURL:")
 	ts.Nil(url)
 }
 
