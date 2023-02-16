@@ -12,7 +12,6 @@ go test ./pkg/... -cover && \
 go test ./internal/... -cover ; \
 fi
 
-
 # Run integration tests
 CMD [ "go" , "test", "-v", "./integration/..." ]
 

@@ -11,11 +11,6 @@ mock:
 	@echo "==> Generating mocks for unit test 🇪🇸 <=="
 	go generate ./...
 
-.PHONY: mockdocker
-mockdocker:
-	@echo "==> Generation mocks for unit test using Docker"
-	docker run -v "$PWD":/src -w /src vektra/mockery --all --inpackage
-
 .PHONE: rmmock
 rmmock:
 	@echo "==> Removing all mock files  <=="
@@ -26,8 +21,6 @@ test:
 	@echo "==> Running Unit Tests 🎮 <=="
 	go test ./pkg/... -cover
 	go test ./internal/... -cover
-	# go tool cover -html=coverage.out -o coverage.html
-	# go tool cover -html=coverageinternal.out -o coverageinternal.html
 
 .PHONY: testmock
 testmock:

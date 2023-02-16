@@ -159,4 +159,32 @@ func (ts *TSForm3) TestCreateAccountError() {
 	ts.Empty(data)
 }
 
-// func (ts *TSForm3) Test
+func (ts *TSForm3) TestFetchAccount() {
+	mockAccount.On("Fetch", mock.Anything).Return(dataTest1, nil)
+	account := form3Test.Account()
+	data, err := account.Fetch("FakeID")
+	ts.NoError(err)
+	ts.Equal(dataTest1, data)
+}
+
+func (ts *TSForm3) TestFetchAccountError() {
+	mockAccount.On("Fetch", mock.Anything).Return(model.DataModel{}, fmt.Errorf("status code 404: fakeErrorOnFetch"))
+	account := form3Test.Account()
+	data, err := account.Fetch("FakeID")
+	ts.ErrorContains(err, "status code 404:")
+	ts.Empty(data)
+}
+
+func (ts *TSForm3) TestDeleteAccount() {
+	mockAccount.On("Delete", mock.Anything, mock.Anything).Return(nil)
+	account := form3Test.Account()
+	err := account.Delete("fakeID", 0)
+	ts.NoError(err)
+}
+
+func (ts *TSForm3) TestDeleteAccountError() {
+	mockAccount.On("Delete", mock.Anything, mock.Anything).Return(fmt.Errorf("status code 404: fakeError"))
+	account := form3Test.Account()
+	err := account.Delete("fakeID", 7)
+	ts.ErrorContains(err, "status code 404:")
+}
