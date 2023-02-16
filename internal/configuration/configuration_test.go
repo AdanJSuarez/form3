@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -15,7 +16,7 @@ const (
 	organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
 )
 
-var configurationTest *configuration
+var configurationTest *Configuration
 
 type TSConfiguration struct{ suite.Suite }
 
@@ -24,12 +25,8 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSConfiguration) BeforeTest(_, _ string) {
-	configurationTest = &configuration{}
-}
-
-func (ts *TSConfiguration) TestNewType() {
-	config := New()
-	ts.IsType(new(configuration), config)
+	configurationTest = new(Configuration)
+	ts.IsType(new(Configuration), configurationTest)
 }
 
 func (ts *TSConfiguration) TestValidInitializeByValue() {
@@ -64,16 +61,27 @@ func (ts *TSConfiguration) TestInvalidBaseURL3() {
 	ts.Nil(url)
 }
 
-func (ts *TSConfiguration) TestNotImplementedInitializeByYaml() {
-	err := configurationTest.InitializeByYaml()
-	ts.ErrorContains(err, "not implemented")
-	ts.Empty(configurationTest.baseURL)
-	ts.Empty(configurationTest.accountPath)
+func (ts *TSConfiguration) TestValidInitializeByEnv() {
+	_, ok := os.LookupEnv(baseURLEnvKey)
+	if !ok {
+		os.Setenv(baseURLEnvKey, rawBaseURL)
+		defer os.Unsetenv(baseURLEnvKey)
+	}
+	_, ok = os.LookupEnv(accountPathEnvKey)
+	if !ok {
+		os.Setenv(accountPathEnvKey, accountPath)
+		defer os.Unsetenv(accountPathEnvKey)
+	}
+
+	err := configurationTest.InitializeByEnv()
+	ts.NoError(err)
+	ts.NotEmpty(configurationTest.baseURL)
+	ts.NotEmpty(configurationTest.accountPath)
 }
 
-func (ts *TSConfiguration) TestNotImplementedInitializeByEnv() {
+func (ts *TSConfiguration) TestInvalidInitializeByEnv() {
 	err := configurationTest.InitializeByEnv()
-	ts.ErrorContains(err, "not implemented")
+	ts.ErrorContains(err, "failed to get BASE_URL from environment variables")
 	ts.Empty(configurationTest.baseURL)
 	ts.Empty(configurationTest.accountPath)
 }

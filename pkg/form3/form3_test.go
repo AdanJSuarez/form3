@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/AdanJSuarez/form3/pkg/form3/configuration"
 	"github.com/AdanJSuarez/form3/pkg/model"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -38,7 +37,7 @@ var (
 			},
 		},
 	}
-	mockConfiguration *configuration.MockConfiguration
+	mockConfiguration *MockConfiguration
 	mockAccount       *MockAccount
 )
 
@@ -49,7 +48,7 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSForm3) BeforeTest(_, _ string) {
-	mockConfiguration = new(configuration.MockConfiguration)
+	mockConfiguration = new(MockConfiguration)
 	mockAccount = new(MockAccount)
 	form3Test = New()
 	ts.IsType(new(Form3), form3Test)
@@ -95,29 +94,6 @@ func (ts *TSForm3) TestInvalidAccountObject() {
 	err = f3Test.ConfigurationByValue(rawBaseURLTest, accountPath)
 	ts.NotNil(err)
 	ts.Nil(f3Test.Account())
-}
-
-func (ts *TSForm3) TestInvalidConfigurationByYaml() {
-	mockConfiguration.On("InitializeByYaml").Return(fmt.Errorf("not implemented"))
-	mockConfiguration.On("AccountPath", mock.Anything).Return(accountPath)
-	mockConfiguration.On("BaseURL", mock.Anything).Return(baseURLTest)
-	form3Test = New()
-	form3Test.configuration = mockConfiguration
-
-	err := form3Test.ConfigurationByYaml()
-	ts.NotNil(err)
-}
-
-func (ts *TSForm3) TestValidConfigurationByYaml() {
-	mockConfiguration.On("InitializeByYaml").Return(nil)
-	mockConfiguration.On("AccountPath", mock.Anything).Return(accountPath)
-	mockConfiguration.On("BaseURL", mock.Anything).Return(baseURLTest)
-	form3Test = New()
-	form3Test.configuration = mockConfiguration
-
-	err := form3Test.ConfigurationByYaml()
-	ts.Nil(err)
-	ts.NotEmpty(form3Test.Account())
 }
 
 func (ts *TSForm3) TestInvalidConfigurationByEnv() {

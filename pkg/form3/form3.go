@@ -2,11 +2,11 @@ package form3
 
 import (
 	"github.com/AdanJSuarez/form3/internal/account"
-	"github.com/AdanJSuarez/form3/pkg/form3/configuration"
+	"github.com/AdanJSuarez/form3/internal/configuration"
 )
 
 type Form3 struct {
-	configuration configuration.Configuration
+	configuration Configuration
 	account       Account
 }
 
@@ -18,15 +18,6 @@ func New() *Form3 {
 
 func (f *Form3) ConfigurationByValue(rawBaseURL, accountPath string) error {
 	if err := f.configuration.InitializeByValue(rawBaseURL, accountPath); err != nil {
-		return err
-	}
-	f.initializeForm3()
-	return nil
-}
-
-// ConfigurationByYaml returns error: Not implemented (for simplicity)
-func (f *Form3) ConfigurationByYaml() error {
-	if err := f.configuration.InitializeByYaml(); err != nil {
 		return err
 	}
 	f.initializeForm3()

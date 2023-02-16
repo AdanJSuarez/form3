@@ -16,7 +16,7 @@ const (
 	healthCheckNumOfTries = 5
 	healthCheckInterval   = 5 * time.Second
 	organizationID        = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	accountAPIURL         = "http://localhost:8080"
+	baseAPIURL            = "http://accountapi:8080"
 	accountPath           = "/v1/organisation/accounts"
 )
 
@@ -41,9 +41,6 @@ var (
 			},
 		},
 	}
-	// linksTest = model.Links{
-	// 	Self: accountPath + "/" + jitUUID,
-	// }
 )
 
 type TSIntegration struct{ suite.Suite }
@@ -58,12 +55,11 @@ func (ts *TSIntegration) SetupSuite() {
 
 func (ts *TSIntegration) BeforeTest(_, _ string) {
 	f3Test = form3.New()
-	if err := f3Test.ConfigurationByValue(accountAPIURL, accountPath); err != nil {
+	if err := f3Test.ConfigurationByValue(baseAPIURL, accountPath); err != nil {
 		log.Printf("Error on ConfigurationByValue: %v", err)
 		return
 	}
 	accountTest = f3Test.Account()
-
 }
 
 func (ts *TSIntegration) AfterTest(_, _ string) {
@@ -71,6 +67,45 @@ func (ts *TSIntegration) AfterTest(_, _ string) {
 		log.Printf("Deleting %s", id)
 		accountTest.Delete(id, 0)
 	}
+}
+
+// It should connect, and return an error 400 because of the wrong account ID.
+func (ts *TSIntegration) TestConfigurationByValue() {
+	f3Test = form3.New()
+	if err := f3Test.ConfigurationByValue(baseAPIURL, accountPath); err != nil {
+		log.Printf("Error on ConfigurationByValue: %v", err)
+		return
+	}
+	accountTest = f3Test.Account()
+	data, err := accountTest.Fetch("xxxxxx")
+	ts.ErrorContains(err, "status code 400:")
+	ts.Empty(data)
+}
+
+// It should connect but returns a 404 because the wrong Account path.
+func (ts *TSIntegration) TestInvalidConfigurationByValue2() {
+	f3Test = form3.New()
+	if err := f3Test.ConfigurationByValue(baseAPIURL, "/organisation/account"); err != nil {
+		log.Printf("Error on ConfigurationByValue: %v", err)
+		return
+	}
+	accountTest = f3Test.Account()
+	data, err := accountTest.Fetch("xxxxxx")
+	ts.ErrorContains(err, "status code 404: not found: trying to access a non-existent endpoint or resource")
+	ts.Empty(data)
+}
+
+// It should not connect at all with the wrong baseURL.
+func (ts *TSIntegration) TestInvalidConfigurationByValue1() {
+	f3Test = form3.New()
+	if err := f3Test.ConfigurationByValue("http://localhost:8080", accountPath); err != nil {
+		log.Printf("Error on ConfigurationByValue: %v", err)
+		return
+	}
+	accountTest = f3Test.Account()
+	data, err := accountTest.Fetch("xxxxxx")
+	ts.ErrorContains(err, "connect: connection refused")
+	ts.Empty(data)
 }
 
 func (ts *TSIntegration) TestCreateAccount() {
@@ -96,7 +131,7 @@ func (ts *TSIntegration) TestCreateAccountSameUUID() {
 func (ts *TSIntegration) startHealthCheck() {
 	for idx := 0; idx < healthCheckNumOfTries; idx++ {
 		log.Printf("Starting health-check num. %d", idx+1)
-		if ts.getRequest() {
+		if ts.getHealthCheck() {
 			log.Printf("Health-check num. %d success", idx+1)
 			return
 		}
@@ -104,8 +139,8 @@ func (ts *TSIntegration) startHealthCheck() {
 	log.Fatal("==> Server not ready. Integration tests cannot run! <==")
 }
 
-func (ts *TSIntegration) getRequest() bool {
-	stringConnection := accountAPIURL + "/v1/health"
+func (ts *TSIntegration) getHealthCheck() bool {
+	stringConnection := baseAPIURL + "/v1/health"
 	_, err := http.Get(stringConnection)
 	if err != nil {
 		log.Printf("error on health-check: %v", err)

@@ -48,3 +48,6 @@ services:
     build: .
     depends_on:
       - accountapi
+    environment:
+      - BASE_URL=http://accountapi
+      - ACCOUNT_PATH=/v1/organisation/accounts
