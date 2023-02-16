@@ -49,5 +49,5 @@ services:
     depends_on:
       - accountapi
     environment:
-      - BASE_URL=http://accountapi
+      - BASE_URL=http://accountapi:8080
       - ACCOUNT_PATH=/v1/organisation/accounts

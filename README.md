@@ -1,12 +1,12 @@
 # Form3 Homework
 
+Name: Adan Jesus Suarez Garcia
+
 Form3 homework.
 
 Ref:
 
 https://github.com/form3tech-oss/interview-accountapi
-
-https://github.com/form3tech-oss/go-form3
 
 ## Client library
 
@@ -17,35 +17,18 @@ For accounts, it implements:
 - `Fetch` a bank account.
 - `Delete` a bank account.
 
-A nice future feature we could include (not included) is to expose a C-shared API that would allow the use of this library from any other language than Go that can read C libraries, like Java, Python, Rust, C++, C, etc.
+## Tests
+The description says the following: `Be well tested to the level you would expect in a commercial environment. Note that tests are expected to
+run against the provided fake account API.`
 
-## Use
+To fullfil this requirement, I implemented two groups, unit tests and integration tests. The integration test are the one that will run against
+the provided fake account API.
+- The unit tests are located in each module.
+- The integration tests are in a specific folder called `integration`.
 
-The library use an extension of the principle of [Hiding Information](https://en.wikipedia.org/wiki/Information_hiding) therefore you only can reach the functionality expose in form3.go that would be:
-```go
-    type Form3 struct
-```
+**Important note:** During the testing I found some discrepancies between the Documentation and the behavior of the fake API, therefore some tests fail
+- TestCreateAccountWithoutType: it should pass because based on the doc the field is optional for account creation but the fake API got us an validation error.
 
-```go
-    type Account interface {
-        Create()
-        Fetch()
-        Delete()
-    }
-```
-
-## Vendor
-
-The eternal discussion of pushing the dependency to your repo. I saw in your client [repo](https://github.com/form3tech-oss/go-form3) you included it, so I took the same approach.
-This, as everything in live, brings pros and cons.
-This blog post talk about this... and he is a big fun btw :) [link](https://blog.boot.dev/golang/should-you-commit-the-vendor-folder-in-go/)
-
-
-## Network
-https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach
-
-## Requirement for different method:
-- Create: id, organisation_id, type(optional), attribute(base_currency, country)
 
 ## Mocks
 
@@ -58,6 +41,14 @@ If the Mockery installation fails for any reason when creating the image after `
 - Generate the mocks based on the instruction. You would need to add the following Mockery flag: `--inpackage` to generate the mocks, only if the way you chose wasn't `go generate ./...`
 - Uncomment line 16 in Dockerfile. It has a note.
 - Run `docker-compose up`.
+
+## Vendor
+
+Like with mocks, there is a discussion of committing the dependencies or not to your repo. At the end, it depends of the team.
+I saw in your client [repo](https://github.com/form3tech-oss/go-form3) you included it, therefore I took the same approach.
+
+## Requirement for different method:
+- Create: id, organisation_id, type(optional), attribute(base_currency, country)
 
 ## Configuration
 

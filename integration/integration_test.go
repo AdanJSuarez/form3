@@ -16,31 +16,34 @@ const (
 	healthCheckNumOfTries = 5
 	healthCheckInterval   = 5 * time.Second
 	organizationID        = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	baseAPIURL            = "http://accountapi:8080"
+	baseAPIURL            = "http://localhost:8080" //"http://accountapi:8080"
 	accountPath           = "/v1/organisation/accounts"
 )
 
 var (
-	f3Test        *form3.Form3
-	accountTest   form3.Account
-	uuids         = []string{}
-	jitUUID       = generateUUID()
-	dataModelTest = model.DataModel{
-		Data: model.Data{
-			ID:             jitUUID,
-			OrganizationID: organizationID,
-			Type:           "accounts",
-			Version:        0,
-			Attributes: model.Attributes{
-				Country: "GB",
-				// BaseCurrency: "GBP",
-				BankID:     "123456",
-				BankIDCode: "GBDSC",
-				Bic:        "EXMPLGB2XXX",
-				Name:       []string{"a", "b"},
-			},
-		},
+	f3Test      *form3.Form3
+	accountTest form3.Account
+	uuids       = []string{}
+	jitUUID     = generateUUID()
+	attribute   = model.Attributes{
+		Country:      "GB",
+		BaseCurrency: "GBP",
+		BankID:       "123456",
+		BankIDCode:   "GBDSC",
+		Bic:          "EXMPLGB2XXX",
+		Name:         []string{"a", "b"},
 	}
+	dataTest = model.Data{
+		ID:             jitUUID,
+		OrganizationID: organizationID,
+		Type:           "accounts",
+		Version:        0,
+		Attributes:     attribute,
+	}
+	dataModel = model.DataModel{
+		Data: dataTest,
+	}
+	dataModelTest model.DataModel
 )
 
 type TSIntegration struct{ suite.Suite }
@@ -53,9 +56,32 @@ func (ts *TSIntegration) SetupSuite() {
 	ts.startHealthCheck()
 }
 
+func (ts *TSIntegration) startHealthCheck() {
+	for idx := 0; idx < healthCheckNumOfTries; idx++ {
+		log.Printf("Starting health-check num. %d", idx+1)
+		if ts.getHealthCheck() {
+			log.Printf("Health-check num. %d success", idx+1)
+			return
+		}
+	}
+	log.Fatal("==> Server not ready. Integration tests cannot run! <==")
+}
+
+func (ts *TSIntegration) getHealthCheck() bool {
+	stringConnection := baseAPIURL + "/v1/health"
+	_, err := http.Get(stringConnection)
+	if err != nil {
+		log.Printf("error on health-check: %v", err)
+		time.Sleep(healthCheckInterval)
+		return false
+	}
+	return true
+}
+
 func (ts *TSIntegration) BeforeTest(_, _ string) {
+	dataModelTest = dataModel
 	f3Test = form3.New()
-	if err := f3Test.ConfigurationByValue(baseAPIURL, accountPath); err != nil {
+	if err := f3Test.ConfigurationByValue(baseAPIURL, accountPath); err != nil { //if err := f3Test.ConfigurationByEnv(); err != nil {
 		log.Printf("Error on ConfigurationByValue: %v", err)
 		return
 	}
@@ -108,47 +134,63 @@ func (ts *TSIntegration) TestInvalidConfigurationByValue1() {
 	ts.Empty(data)
 }
 
+// It should create a valid account with no errors
 func (ts *TSIntegration) TestCreateAccount() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.Equal(dataModelTest, data)
 }
 
-func (ts *TSIntegration) TestEmptyDataCreateAccount() {
+// It should returns a 400 when trying to create an account with incomplete info.
+func (ts *TSIntegration) TestFailToCreateAccountEmptyData() {
 	data, err := accountTest.Create(model.DataModel{})
-	ts.ErrorContains(err, "status code 400: validation failure list:\nvalidation failure list:\nvalidation failure list:")
+	ts.ErrorContains(err, "status code 400:")
 	ts.Empty(data)
 }
 
-func (ts *TSIntegration) TestCreateAccountSameUUID() {
+// It should fail trying to create an account with an already used UUID.
+func (ts *TSIntegration) TestFailToCreateAccountSameUUID() {
 	dataModelTest.Data.ID = generateUUID()
 	_, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	_, err = accountTest.Create(dataModelTest)
-	ts.ErrorContains(err, "status code: 409")
+	ts.ErrorContains(err, "status code 409: resource has already been created")
 }
 
-func (ts *TSIntegration) startHealthCheck() {
-	for idx := 0; idx < healthCheckNumOfTries; idx++ {
-		log.Printf("Starting health-check num. %d", idx+1)
-		if ts.getHealthCheck() {
-			log.Printf("Health-check num. %d success", idx+1)
-			return
-		}
-	}
-	log.Fatal("==> Server not ready. Integration tests cannot run! <==")
+// It should fail if we try to create an account without ID
+func (ts *TSIntegration) TestFailToCreateAccountWithoutID() {
+	dataModelTest.Data.ID = ""
+	data, err := accountTest.Create(dataModelTest)
+	ts.ErrorContains(err, "status code 400")
+	ts.Empty(data)
 }
 
-func (ts *TSIntegration) getHealthCheck() bool {
-	stringConnection := baseAPIURL + "/v1/health"
-	_, err := http.Get(stringConnection)
-	if err != nil {
-		log.Printf("error on health-check: %v", err)
-		time.Sleep(healthCheckInterval)
-		return false
-	}
-	return true
+// It should fail if we try to create an account without organizationID
+func (ts *TSIntegration) TestFailToCreateAccountWithoutOrgID() {
+	dataModelTest.Data.OrganizationID = ""
+	data, err := accountTest.Create(dataModelTest)
+	ts.ErrorContains(err, "status code 400")
+	ts.Empty(data)
 }
+
+// TODO: Do the same for none account creation
+// It shouldn't fail if we don't provide "type" in account creation
+func (ts *TSIntegration) TestCreateAccountWithoutType() {
+	dataModelTest.Data.Type = ""
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should fail if we don't pass the "attributes" in account creation
+func (ts *TSIntegration) TestFailToCreateAccountWithoutAttributes() {
+	dataModelTest.Data.Attributes = model.Attributes{}
+	data, err := accountTest.Create(dataModelTest)
+	ts.ErrorContains(err, "status code 400")
+	ts.Empty(data)
+}
+
+//
 
 func generateUUID() string {
 	id := uuid.New()

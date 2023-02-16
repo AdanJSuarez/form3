@@ -15,6 +15,8 @@ type StatusHandler struct {
 	next handler.StatusErrorHandler
 }
 
+// TODO: Implement Retry
+
 func NewStatusHandler() *StatusHandler {
 	sh := &StatusHandler{}
 	uncoveredStatus := handler.NewUncoveredHandler()
