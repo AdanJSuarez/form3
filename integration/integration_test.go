@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+// TODO: Change baseAPIURL for accountapi
 const (
 	healthCheckNumOfTries = 5
 	healthCheckInterval   = 5 * time.Second
@@ -78,6 +79,7 @@ func (ts *TSIntegration) getHealthCheck() bool {
 	return true
 }
 
+// TODO: Change ConfigurationByValue for ConfigurationByEnv
 func (ts *TSIntegration) BeforeTest(_, _ string) {
 	dataModelTest = dataModel
 	f3Test = form3.New()
@@ -124,7 +126,7 @@ func (ts *TSIntegration) TestInvalidConfigurationByValue2() {
 // It should not connect at all with the wrong baseURL.
 func (ts *TSIntegration) TestInvalidConfigurationByValue1() {
 	f3Test = form3.New()
-	if err := f3Test.ConfigurationByValue("http://localhost:8080", accountPath); err != nil {
+	if err := f3Test.ConfigurationByValue("http://localhost:5999", accountPath); err != nil {
 		log.Printf("Error on ConfigurationByValue: %v", err)
 		return
 	}
@@ -190,7 +192,35 @@ func (ts *TSIntegration) TestFailToCreateAccountWithoutAttributes() {
 	ts.Empty(data)
 }
 
-//
+// It shouldn't fail if we don't pass "name" in the attributes.
+func (ts *TSIntegration) TestCreateAccountWithoutName() {
+	dataModelTest.Data.Attributes.Name = nil
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should not fail without base_currency for none EUR country
+func (ts *TSIntegration) TestCreateAccountWithoutBaseCurrency() {
+	dataModelTest.Data.Attributes.BaseCurrency = ""
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should fail without base_currency for a EUR country
+func (ts *TSIntegration) TestFailCreateAccountWithoutBaseCurrency() {
+	attribute := model.Attributes{
+		Country:    "ES",
+		BankID:     "12345678",
+		BankIDCode: "ESNC",
+		Name:       []string{"a", "b"},
+	}
+	dataModelTest.Data.Attributes = attribute
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
 
 func generateUUID() string {
 	id := uuid.New()
