@@ -26,7 +26,7 @@ the provided fake account API.
 - The unit tests are located in each module.
 - The integration tests are in a specific folder called `integration`.
 
-My tests (integration) include "contract" checking.
+My tests in the integration folder include "contract" checking. It could be seen as a combination of integration and contract testing.
 
 **Important note:** During the developing I found some discrepancies between the Documentation and the behavior of the fake API, therefore some tests fail. All integration tests are documented with the expected behavior.
 
@@ -55,3 +55,7 @@ To set those parameters I implemented two different ways. One is setting them as
 ## Retry mechanism
 
 The API documentation encourage us to implement a [retry mechanism](https://www.api-docs.form3.tech/api/schemes/sepa-instant-credit-transfer/introduction/timeouts/retry-strategy) on failure. This could be implemented in the client library. I did some test running 10000 concurrent requests against the fake API and instead of receiving 429 I received 500 and, in my case, the dockers got unresponsive after that so I couldn't test it properly and all the following tests never passed, so I decide to not implement it for simplicity, but it is definitely a needed feature for production readiness.
+
+## Headers
+
+The exercise requirements say to not implement authentication so I didn't do anything about it. For production ready we should include the Authentication header.
