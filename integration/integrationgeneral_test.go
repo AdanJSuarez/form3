@@ -54,7 +54,7 @@ func (ts *TSIntegration) getHealthCheck() bool {
 	stringConnection := baseAPIURL + "/v1/health"
 	_, err := http.Get(stringConnection)
 	if err != nil {
-		log.Printf("error on health-check: %v", err)
+		log.Printf("Error during health-check: %v", err)
 		time.Sleep(healthCheckInterval)
 		return false
 	}
@@ -66,7 +66,7 @@ func (ts *TSIntegration) BeforeTest(_, _ string) {
 	dataModelTest = dataModelUK
 	f3Test = form3.New()
 	if err := f3Test.ConfigurationByValue(baseAPIURL, accountPath); err != nil { //if err := f3Test.ConfigurationByEnv(); err != nil {
-		log.Printf("Error on ConfigurationByValue: %v", err)
+		log.Printf("Error in Configuration: %v", err)
 		return
 	}
 	accountTest = f3Test.Account()
