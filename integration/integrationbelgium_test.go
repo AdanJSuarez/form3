@@ -24,7 +24,7 @@ var (
 	}
 )
 
-// It should create an BE account
+// It should create an account
 func (ts *TSIntegration) TestAccountCreateBE1() {
 	dataModelTest = dataModelBE
 	data, err := accountTest.Create(dataModelTest)
@@ -34,7 +34,7 @@ func (ts *TSIntegration) TestAccountCreateBE1() {
 	ts.NotEmpty(data.Data.Attributes.AccountNumber)
 }
 
-// It should create an BE account when we include BIC (Optional)
+// It should create an account when BIC is included.
 func (ts *TSIntegration) TestAccountCreateBE2() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.Attributes.Bic = "EBAXBEBB"
@@ -63,6 +63,24 @@ func (ts *TSIntegration) TestFailCreateAccountBE2() {
 	ts.Empty(data)
 }
 
+// It should not create an account when Bank ID code isn't correct
+func (ts *TSIntegration) TestFailCreateAccountBE3() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.Attributes.BankIDCode = "11111"
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
+
+// It should not create an account when Bank ID code isn't the correct country
+func (ts *TSIntegration) TestFailCreateAccountBE4() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.Attributes.BankIDCode = "ESNCC"
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
+
 // It should create an account when Account Number is included.
 func (ts *TSIntegration) TestAccountCreateBE3() {
 	dataModelTest = dataModelBE
@@ -72,4 +90,13 @@ func (ts *TSIntegration) TestAccountCreateBE3() {
 	ts.NotEmpty(data)
 	ts.NotEmpty(data.Data.Attributes.Iban)
 	ts.NotEmpty(data.Data.Attributes.AccountNumber)
+}
+
+// It should not create an account when Account Number is invalid.
+func (ts *TSIntegration) TestFailAccountCreateBE3() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.Attributes.AccountNumber = "abcdefg"
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
 }
