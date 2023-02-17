@@ -100,3 +100,22 @@ func (ts *TSIntegration) TestFailAccountCreateBE3() {
 	ts.Error(err)
 	ts.Empty(data)
 }
+
+// It should create an account when IBAN is included.
+func (ts *TSIntegration) TestAccountCreateBE4() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.Attributes.Iban = fakeIBAN
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+	ts.Equal(fakeIBAN, data.Data.Attributes.Iban)
+}
+
+// It should not create an account when IBAN is not correct.
+func (ts *TSIntegration) TestFailAccountCreateBE4() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.Attributes.Iban = "AABB00000000"
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}

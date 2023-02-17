@@ -19,6 +19,7 @@ const (
 	organizationID        = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
 	baseAPIURL            = "http://localhost:8080" //"http://accountapi:8080"
 	accountPath           = "/v1/organisation/accounts"
+	fakeIBAN              = "ES2317002001280000001200527600"
 )
 
 var (
