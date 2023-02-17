@@ -141,6 +141,7 @@ func (ts *TSIntegration) TestCreateAccount() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.Equal(dataModelTest, data)
+	ts.NotEmpty(data.Data.Attributes.Iban)
 }
 
 // It should returns a 400 when trying to create an account with incomplete info.
@@ -182,6 +183,7 @@ func (ts *TSIntegration) TestCreateAccountWithoutType() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.NotEmpty(data)
+	ts.NotEmpty(data.Data.Attributes.Iban)
 }
 
 // It should fail if we don't pass the "attributes" in account creation
@@ -198,6 +200,7 @@ func (ts *TSIntegration) TestCreateAccountWithoutName() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.NotEmpty(data)
+	ts.NotEmpty(data.Data.Attributes.Iban)
 }
 
 // It should not fail without base_currency for none EUR country
@@ -206,6 +209,7 @@ func (ts *TSIntegration) TestCreateAccountWithoutBaseCurrency() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.NotEmpty(data)
+	ts.NotEmpty(data.Data.Attributes.Iban)
 }
 
 // It should fail without base_currency for a EUR country
