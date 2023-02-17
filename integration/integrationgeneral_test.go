@@ -135,10 +135,19 @@ func (ts *TSIntegration) TestFailToCreateAccountSameUUID() {
 	ts.ErrorContains(err, "status code 409: resource has already been created")
 }
 
-// It should fail if we try to create an account without ID
+// It should fail if when trying to create an account without ID.
 func (ts *TSIntegration) TestFailToCreateAccountWithoutID() {
 	dataModelTest = dataModelUK
 	dataModelTest.Data.ID = ""
+	data, err := accountTest.Create(dataModelTest)
+	ts.ErrorContains(err, "status code 400")
+	ts.Empty(data)
+}
+
+// It should fail if when trying to create an account with a not UUID.
+func (ts *TSIntegration) TestFailToCreateAccountWithoutID2() {
+	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = "XXXXX-XXXXX-333"
 	data, err := accountTest.Create(dataModelTest)
 	ts.ErrorContains(err, "status code 400")
 	ts.Empty(data)
@@ -153,6 +162,15 @@ func (ts *TSIntegration) TestFailToCreateAccountWithoutOrgID() {
 	ts.Empty(data)
 }
 
+// It should fail if we try to create an account with a not UUID organizationID
+func (ts *TSIntegration) TestFailToCreateAccountWithoutOrgID2() {
+	dataModelTest = dataModelUK
+	dataModelTest.Data.OrganizationID = "ZZZZ-ZZZZZ"
+	data, err := accountTest.Create(dataModelTest)
+	ts.ErrorContains(err, "status code 400")
+	ts.Empty(data)
+}
+
 // It shouldn't fail if we don't provide "type" in account creation
 func (ts *TSIntegration) TestCreateAccountWithoutType() {
 	dataModelTest = dataModelUK
@@ -160,6 +178,16 @@ func (ts *TSIntegration) TestCreateAccountWithoutType() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.NotEmpty(data)
+	ts.NotEmpty(data.Data.Attributes.Iban)
+}
+
+// It should fail if we don't provide "type" in account creation
+func (ts *TSIntegration) TestFailCreateAccountWithType1() {
+	dataModelTest = dataModelUK
+	dataModelTest.Data.Type = "AdanJSuarez"
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
 }
 
 // It should fail if we don't pass the "attributes" in account creation
@@ -180,7 +208,7 @@ func (ts *TSIntegration) TestCreateAccountWithoutName() {
 	ts.NotEmpty(data)
 }
 
-// It should not fail without base_currency for none EUR country
+// It should not fail without base_currency for a none EUR country.
 func (ts *TSIntegration) TestCreateAccountWithoutBaseCurrency() {
 	dataModelTest = dataModelUK
 	dataModelTest.Data.Attributes.BaseCurrency = ""
@@ -193,6 +221,15 @@ func (ts *TSIntegration) TestCreateAccountWithoutBaseCurrency() {
 func (ts *TSIntegration) TestFailCreateAccountWithoutBaseCurrency() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.Attributes.BaseCurrency = ""
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
+
+// It should not fail with invalid base_currency for a EUR country.
+func (ts *TSIntegration) TestFailCreateAccountWithInvalidBaseCurrency() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.Attributes.BaseCurrency = "333"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)

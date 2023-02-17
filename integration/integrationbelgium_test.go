@@ -72,7 +72,7 @@ func (ts *TSIntegration) TestFailCreateAccountBE3() {
 	ts.Empty(data)
 }
 
-// It should not create an account when Bank ID code isn't the correct country
+// It should not create an account when Bank ID code doesn't match the country
 func (ts *TSIntegration) TestFailCreateAccountBE4() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.Attributes.BankIDCode = "ESNCC"
