@@ -25,25 +25,20 @@ const (
 )
 
 type RequestHandler struct {
-	data []byte
-	body io.ReadCloser
+	rawData []byte
+	body    io.ReadCloser
 }
 
-func NewRequestHandler(data interface{}) *RequestHandler {
-	r := &RequestHandler{}
-	if data == nil {
-		return r
-	}
-	r.data = r.dataToBytes(data)
-	r.body = r.dataToBody()
-	return r
+func NewRequestHandler() *RequestHandler {
+	return &RequestHandler{}
 }
 
 func (r *RequestHandler) Body() io.ReadCloser {
 	return r.body
 }
 
-func (r *RequestHandler) Request(method, url, host string) (*http.Request, error) {
+func (r *RequestHandler) Request(data interface{}, method, url, host string) (*http.Request, error) {
+	r.setRawDataAndBody(data)
 	request, err := http.NewRequest(method, url, r.body)
 	if err != nil {
 		return nil, err
@@ -64,6 +59,13 @@ func (r *RequestHandler) SetQuery(request *http.Request, parameterKey, parameter
 	request.URL.RawQuery = query.Encode()
 }
 
+func (r *RequestHandler) setRawDataAndBody(data interface{}) {
+	if data != nil {
+		r.rawData = r.dataToBytes(data)
+		r.body = r.dataToBody()
+	}
+}
+
 func (r *RequestHandler) dataToBytes(data interface{}) []byte {
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
@@ -73,26 +75,30 @@ func (r *RequestHandler) dataToBytes(data interface{}) []byte {
 }
 
 func (r *RequestHandler) dataToBody() io.ReadCloser {
-	return io.NopCloser(bytes.NewBuffer(r.data))
+	return io.NopCloser(bytes.NewBuffer(r.rawData))
 }
 
 func (r *RequestHandler) addRequiredHeader(host string, request *http.Request) {
 	request.Header.Add(HOST_KEY, host)
-	request.Header.Add(DATE_KEY, time.Now().Format(time.RFC1123))
+	request.Header.Add(DATE_KEY, r.nowUTCFormated())
 	request.Header.Add(ACCEPT_KEY, CONTENT_TYPE_VALUE)
 	request.Header.Add(ACCEPT_ENCODING_KEY, ACCEPT_ENCODING_VALUE)
 }
 
 func (r *RequestHandler) addHeaderToRequestWithBody(request *http.Request) {
 	request.Header.Add(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE)
-	request.Header.Add(CONTENT_LENGTH_KEY, fmt.Sprint(len(r.data)))
+	request.Header.Add(CONTENT_LENGTH_KEY, fmt.Sprint(len(r.rawData)))
 	request.Header.Add(DIGEST_KEY, r.digestFormatted())
 }
 
 func (r *RequestHandler) digestFormatted() string {
 	hash := sha256.New()
-	hash.Write(r.data)
+	hash.Write(r.rawData)
 	hashBytes := hash.Sum(nil)
 	desire := fmt.Sprintf(desireFmt, base64.StdEncoding.EncodeToString(hashBytes))
 	return desire
+}
+
+func (r *RequestHandler) nowUTCFormated() string {
+	return time.Now().UTC().Format(http.TimeFormat)
 }
