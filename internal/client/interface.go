@@ -5,6 +5,7 @@ import (
 )
 
 //go:generate mockery --inpackage --name=httpClient
+//go:generate mockery --inpackage --name=requestHandler
 //go:generate mockery --inpackage --name=statusHandler
 
 type httpClient interface {

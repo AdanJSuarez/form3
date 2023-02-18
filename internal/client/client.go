@@ -59,7 +59,7 @@ func (c *Client) Delete(value, parameterKey, parameterValue string) (*http.Respo
 		return nil, err
 	}
 
-	request, err := c.requestHandler.Request(nil, http.MethodPost, url, c.clientURL.Host)
+	request, err := c.requestHandler.Request(nil, http.MethodDelete, url, c.clientURL.Host)
 	if err != nil {
 		return nil, err
 	}
