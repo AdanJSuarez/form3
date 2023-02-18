@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/AdanJSuarez/form3/internal/client/requestbody"
+	"github.com/AdanJSuarez/form3/internal/client/request"
 	"github.com/AdanJSuarez/form3/pkg/model"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -62,7 +62,7 @@ func (ts *TSAccount) BeforeTest(_, _ string) {
 }
 
 func (ts *TSAccount) TestCreateValidDataModel() {
-	req := requestbody.NewRequestBody(dataModelResponse)
+	req := request.NewRequestHandler(dataModelResponse)
 	res := &http.Response{
 		StatusCode: 201,
 		Body:       req.Body(),
@@ -114,7 +114,7 @@ func (ts *TSAccount) TestCreateDecodeError() {
 }
 
 func (ts *TSAccount) TestFetchValidAccount() {
-	req := requestbody.NewRequestBody(dataModelResponse)
+	req := request.NewRequestHandler(dataModelResponse)
 	res := &http.Response{
 		StatusCode: 200,
 		Body:       req.Body(),
@@ -208,7 +208,7 @@ func (ts *TSAccount) TestDeleteInvalidVersion() {
 }
 
 func (ts *TSAccount) TestDecodeResponse() {
-	reqBody := requestbody.NewRequestBody(dataModelResponse)
+	reqBody := request.NewRequestHandler(dataModelResponse)
 	res := &http.Response{
 		StatusCode: 200,
 		Body:       reqBody.Body(),
@@ -218,7 +218,7 @@ func (ts *TSAccount) TestDecodeResponse() {
 	ts.Equal(dataModelResponse, data)
 }
 func (ts *TSAccount) TestDecodeResponseInvalid() {
-	reqBody := requestbody.NewRequestBody("SantaUrsulaCapitalDelUniverso")
+	reqBody := request.NewRequestHandler("SantaUrsulaCapitalDelUniverso")
 	res := &http.Response{
 		StatusCode: 200,
 		Body:       reqBody.Body(),
@@ -235,7 +235,7 @@ func (ts *TSAccount) TestDecodeResponseNilResponse() {
 }
 
 func (ts *TSAccount) TestCloseBody() {
-	reqBody := requestbody.NewRequestBody(dataModelResponse)
+	reqBody := request.NewRequestHandler(dataModelResponse)
 	req := &http.Response{
 		StatusCode: 200,
 		Body:       reqBody.Body(),

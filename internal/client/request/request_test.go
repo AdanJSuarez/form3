@@ -1,4 +1,4 @@
-package requestbody
+package request
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	requestBodyTest *RequestBody
+	requestBodyTest *RequestHandler
 	dataByteTest, _ = json.Marshal(rbDataTest)
 	bodyTest        = io.NopCloser(bytes.NewBuffer(dataByteTest))
 )
@@ -27,8 +27,8 @@ func TestRunTSRequestBody(t *testing.T) {
 }
 
 func (ts *TSRequestBody) BeforeTest(_, _ string) {
-	requestBodyTest = NewRequestBody(rbDataTest)
-	ts.IsType(&RequestBody{}, requestBodyTest)
+	requestBodyTest = NewRequestHandler(rbDataTest)
+	ts.IsType(&RequestHandler{}, requestBodyTest)
 }
 
 func (ts *TSRequestBody) TestBody() {
@@ -37,16 +37,17 @@ func (ts *TSRequestBody) TestBody() {
 }
 
 func (ts *TSRequestBody) TestSize() {
-	size := requestBodyTest.Size()
-	ts.Equal(len(dataByteTest), size)
+	size := len(requestBodyTest.data)
+	expected := len(dataByteTest)
+	ts.Equal(expected, size)
 }
 
-func (ts *TSRequestBody) TestDesire() {
-	desire := requestBodyTest.Digest()
+func (ts *TSRequestBody) TestDigest() {
+	desire := requestBodyTest.digestFormatted()
 	ts.Equal(desireExpected, desire)
 }
 func (ts *TSRequestBody) TestNilBody() {
-	requestBodyTest = NewRequestBody(nil)
+	requestBodyTest = NewRequestHandler(nil)
 	body := requestBodyTest.Body()
 	ts.Equal(nil, body)
 }

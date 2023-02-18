@@ -5,27 +5,19 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	"github.com/AdanJSuarez/form3/internal/client/requestbody"
 )
 
-const (
-	GET    = "GET"
-	POST   = "POST"
-	DELETE = "DELETE"
-)
-
-const (
-	HOST_KEY              = "Host"
-	DATE_KEY              = "Date"
-	ACCEPT_KEY            = "Accept"
-	ACCEPT_ENCODING_KEY   = "Accept-Encoding"
-	CONTENT_TYPE_KEY      = "Content-Type"
-	CONTENT_LENGTH_KEY    = "Content-Length"
-	DIGEST_KEY            = "Digest"
-	CONTENT_TYPE_VALUE    = "application/vnd.api+json"
-	ACCEPT_ENCODING_VALUE = "gzip"
-)
+// const (
+// 	HOST_KEY              = "Host"
+// 	DATE_KEY              = "Date"
+// 	ACCEPT_KEY            = "Accept"
+// 	ACCEPT_ENCODING_KEY   = "Accept-Encoding"
+// 	CONTENT_TYPE_KEY      = "Content-Type"
+// 	CONTENT_LENGTH_KEY    = "Content-Length"
+// 	DIGEST_KEY            = "Digest"
+// 	CONTENT_TYPE_VALUE    = "application/vnd.api+json"
+// 	ACCEPT_ENCODING_VALUE = "gzip"
+// )
 
 const (
 	timeout = 10 * time.Second
@@ -46,11 +38,11 @@ func New(clientURL url.URL) *HTTPClient {
 	}
 }
 
-func (c *HTTPClient) Get(url string) (*http.Response, error) {
-	request, err := c.request(GET, url, requestbody.NewRequestBody(nil))
-	if err != nil {
-		return nil, err
-	}
+func (c *HTTPClient) Get(request *http.Request) (*http.Response, error) {
+	// request, err := c.request(GET, url, request.NewRequestHandler(nil))
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	response, err := c.doRequest(request)
 	if err != nil {
@@ -59,11 +51,11 @@ func (c *HTTPClient) Get(url string) (*http.Response, error) {
 	return response, nil
 }
 
-func (c *HTTPClient) Post(body RequestBody) (*http.Response, error) {
-	request, err := c.request(POST, c.clientURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
+func (c *HTTPClient) Post(request *http.Request) (*http.Response, error) {
+	// request, err := c.request(POST, c.clientURL.String(), body)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	response, err := c.doRequest(request)
 	if err != nil {
@@ -72,13 +64,13 @@ func (c *HTTPClient) Post(body RequestBody) (*http.Response, error) {
 	return response, nil
 }
 
-func (c *HTTPClient) Delete(url, parameterKey, parameterValue string) (*http.Response, error) {
-	request, err := c.request(DELETE, url, requestbody.NewRequestBody(nil))
-	if err != nil {
-		return nil, err
-	}
+func (c *HTTPClient) Delete(request *http.Request) (*http.Response, error) {
+	// request, err := c.request(DELETE, url, request.NewRequestHandler(nil))
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	c.setQuery(request, parameterKey, parameterValue)
+	// c.setQuery(request, parameterKey, parameterValue)
 
 	response, err := c.doRequest(request)
 	if err != nil {
@@ -87,20 +79,20 @@ func (c *HTTPClient) Delete(url, parameterKey, parameterValue string) (*http.Res
 	return response, nil
 }
 
-func (c *HTTPClient) request(method string, url string, requestBody RequestBody) (*http.Request, error) {
-	request, err := http.NewRequest(method, url, requestBody.Body())
-	if err != nil {
-		return nil, err
-	}
+// func (c *HTTPClient) request(method string, url string, requestBody RequestBody) (*http.Request, error) {
+// 	request, err := http.NewRequest(method, url, requestBody.Body())
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	c.addRequiredHeader(request)
+// 	c.addRequiredHeader(request)
 
-	if requestBody.Body() != nil {
-		c.addHeaderToRequestWithBody(request, requestBody.Size(), requestBody.Digest())
-	}
+// 	if requestBody.Body() != nil {
+// 		c.addHeaderToRequestWithBody(request, requestBody.Size(), requestBody.Digest())
+// 	}
 
-	return request, nil
-}
+// 	return request, nil
+// }
 
 func (c *HTTPClient) doRequest(request *http.Request) (*http.Response, error) {
 	emptyResponse := &http.Response{}
@@ -114,21 +106,21 @@ func (c *HTTPClient) doRequest(request *http.Request) (*http.Response, error) {
 	return response, err
 }
 
-func (c *HTTPClient) setQuery(request *http.Request, parameterKey, parameterValue string) {
-	query := request.URL.Query()
-	query.Add(parameterKey, parameterValue)
-	request.URL.RawQuery = query.Encode()
-}
+// func (c *HTTPClient) setQuery(request *http.Request, parameterKey, parameterValue string) {
+// 	query := request.URL.Query()
+// 	query.Add(parameterKey, parameterValue)
+// 	request.URL.RawQuery = query.Encode()
+// }
 
-func (c *HTTPClient) addRequiredHeader(request *http.Request) {
-	request.Header.Add(HOST_KEY, c.clientURL.Host)
-	request.Header.Add(DATE_KEY, time.Now().Format(time.RFC1123))
-	request.Header.Add(ACCEPT_KEY, CONTENT_TYPE_VALUE)
-	request.Header.Add(ACCEPT_ENCODING_KEY, ACCEPT_ENCODING_VALUE)
-}
+// func (c *HTTPClient) addRequiredHeader(request *http.Request) {
+// 	request.Header.Add(HOST_KEY, c.clientURL.Host)
+// 	request.Header.Add(DATE_KEY, time.Now().Format(time.RFC1123))
+// 	request.Header.Add(ACCEPT_KEY, CONTENT_TYPE_VALUE)
+// 	request.Header.Add(ACCEPT_ENCODING_KEY, ACCEPT_ENCODING_VALUE)
+// }
 
-func (c *HTTPClient) addHeaderToRequestWithBody(request *http.Request, size int, desire string) {
-	request.Header.Add(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE)
-	request.Header.Add(CONTENT_LENGTH_KEY, fmt.Sprint(size))
-	request.Header.Add(DIGEST_KEY, desire)
-}
+// func (c *HTTPClient) addHeaderToRequestWithBody(request *http.Request, size int, desire string) {
+// 	request.Header.Add(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE)
+// 	request.Header.Add(CONTENT_LENGTH_KEY, fmt.Sprint(size))
+// 	request.Header.Add(DIGEST_KEY, desire)
+// }

@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/AdanJSuarez/form3/internal/client/requestbody"
+	"github.com/AdanJSuarez/form3/internal/client/request"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
@@ -45,7 +45,7 @@ var (
 		StatusCode: 204,
 		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
 	}
-	reqBodyTest = requestbody.NewRequestBody(dataTest)
+	reqBodyTest = request.NewRequestHandler(dataTest)
 )
 
 type TSHTTPClient struct{ suite.Suite }
@@ -157,7 +157,7 @@ func (ts *TSHTTPClient) TestValidRequest() {
 }
 
 func (ts *TSHTTPClient) TestValidRequestNotBody() {
-	rbTest := requestbody.NewRequestBody(nil)
+	rbTest := request.NewRequestHandler(nil)
 	request, err := httpClientTest.request(POST, httpClientTest.clientURL.String(), rbTest)
 	ts.NotNil(request)
 	ts.NoError(err)
@@ -201,7 +201,7 @@ func (ts *TSHTTPClient) TestEmptyResponseAndNilRequest() {
 
 func (ts *TSHTTPClient) TestQuery() {
 	request, err := httpClientTest.request(DELETE, httpClientTest.clientURL.String(),
-		requestbody.NewRequestBody(nil))
+		request.NewRequestHandler(nil))
 	ts.NoError(err)
 	httpClientTest.setQuery(request, "fakeKey", "fakeValue")
 	ts.Equal("fakeKey=fakeValue", request.URL.RawQuery)

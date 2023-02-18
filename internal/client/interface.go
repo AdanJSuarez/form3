@@ -2,14 +2,12 @@ package client
 
 import (
 	"net/http"
-
-	"github.com/AdanJSuarez/form3/internal/client/requestbody"
 )
 
 type httpClient interface {
-	Get(url string) (*http.Response, error)
-	Post(body *requestbody.RequestBody) (*http.Response, error)
-	Delete(url, parameterKey, parameterValue string) (*http.Response, error)
+	Get(request *http.Request) (*http.Response, error)
+	Post(request *http.Request) (*http.Response, error)
+	Delete(request *http.Request) (*http.Response, error)
 }
 
 type statusHandler interface {
