@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/AdanJSuarez/form3/internal/statushandler/handler"
+	"github.com/AdanJSuarez/form3/internal/client/statushandler/handler"
 )
 
 // Ref: https://refactoring.guru/design-patterns/chain-of-responsibility

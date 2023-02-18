@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/AdanJSuarez/form3/internal/statushandler/handler"
+	"github.com/AdanJSuarez/form3/internal/client/statushandler/handler"
 	"github.com/stretchr/testify/suite"
 )
 

@@ -47,6 +47,7 @@ If the Mockery installation fails for any reason when creating the image after `
 Like with mocks, there is a discussion of committing the dependencies or not to your repo. At the end, it depends of the team.
 I saw in your client [repo](https://github.com/form3tech-oss/go-form3) you included it, therefore I took the same approach.
 
+# Production readiness
 ## Configuration
 
 This implementation of client library needs basically to parameters to run. The `Form3 URL` and the `account path`.
@@ -59,3 +60,7 @@ The API documentation encourage us to implement a [retry mechanism](https://www.
 ## Headers
 
 The exercise requirements say to not implement authentication so I didn't do anything about it. For production ready we should include the Authentication header.
+
+## Create
+
+The instruction require to be simple and concise, so only implemented tha basic functionality for `Create`. One nice feature could be the possibility to pass parameters for creation instead of passing the `model.Data` The values that the user doesn't change often, could be set through configuration make it even simpler.

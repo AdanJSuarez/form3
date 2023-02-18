@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/AdanJSuarez/form3/internal/client"
-	"github.com/AdanJSuarez/form3/internal/statushandler"
 	"github.com/AdanJSuarez/form3/pkg/model"
 )
 
@@ -16,29 +15,26 @@ const httpResponseNilError = "http response is nil"
 var emptyDataModel = model.DataModel{}
 
 type Account struct {
-	client        Client
-	statusHandler StatusHandler
+	client Client
 }
 
 // New returns a pointer of Account initialized
 func New(baseURL url.URL, accountPath string) *Account {
-	baseURL.Path = accountPath
-	return &Account{
-		client:        client.New(baseURL),
-		statusHandler: statushandler.NewStatusHandler(),
-	}
+	account := &Account{}
+	accountURL := account.accountURL(baseURL, accountPath)
+	account.client = client.New(accountURL)
+	return account
 }
 
 func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
-	dataBody := client.NewRequestBody(data)
-	response, err := a.client.Post(dataBody)
+	response, err := a.client.Post(data)
 	if err != nil {
 		return emptyDataModel, err
 	}
 	defer a.closeBody(response)
 
 	if !a.isCreated(response) {
-		return emptyDataModel, a.statusHandler.HandleError(response)
+		return emptyDataModel, a.client.HandleError(response)
 	}
 
 	return a.decodeResponse(response)
@@ -52,7 +48,7 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	defer a.closeBody(response)
 
 	if !a.isFetched(response) {
-		return emptyDataModel, a.statusHandler.HandleError(response)
+		return emptyDataModel, a.client.HandleError(response)
 	}
 
 	return a.decodeResponse(response)
@@ -66,10 +62,15 @@ func (a *Account) Delete(accountID string, version int) error {
 	defer a.closeBody(response)
 
 	if !a.isDeleted(response) {
-		return a.statusHandler.HandleError(response)
+		return a.client.HandleError(response)
 	}
 
 	return err
+}
+
+func (a *Account) accountURL(baseURL url.URL, accountPath string) url.URL {
+	baseURL.Path = accountPath
+	return baseURL
 }
 
 func (a *Account) decodeResponse(response *http.Response) (model.DataModel, error) {
@@ -84,15 +85,15 @@ func (a *Account) decodeResponse(response *http.Response) (model.DataModel, erro
 }
 
 func (a *Account) isCreated(response *http.Response) bool {
-	return a.statusHandler.StatusCreated(response)
+	return a.client.StatusCreated(response)
 }
 
 func (a *Account) isFetched(response *http.Response) bool {
-	return a.statusHandler.StatusOK(response)
+	return a.client.StatusOK(response)
 }
 
 func (a *Account) isDeleted(response *http.Response) bool {
-	return a.statusHandler.StatusNoContent(response)
+	return a.client.StatusNoContent(response)
 }
 
 func (a *Account) closeBody(response *http.Response) {

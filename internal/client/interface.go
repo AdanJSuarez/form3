@@ -1,18 +1,20 @@
 package client
 
 import (
-	"io"
 	"net/http"
+
+	"github.com/AdanJSuarez/form3/internal/client/requestbody"
 )
 
-//go:generate mockery --inpackage --name=httpClient
-
-type RequestBody interface {
-	Body() io.ReadCloser
-	Size() int
-	Digest() string
+type httpClient interface {
+	Get(url string) (*http.Response, error)
+	Post(body *requestbody.RequestBody) (*http.Response, error)
+	Delete(url, parameterKey, parameterValue string) (*http.Response, error)
 }
 
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
+type statusHandler interface {
+	StatusCreated(response *http.Response) bool
+	StatusOK(response *http.Response) bool
+	StatusNoContent(response *http.Response) bool
+	HandleError(response *http.Response) error
 }
