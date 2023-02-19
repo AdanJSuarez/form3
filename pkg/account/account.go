@@ -10,7 +10,10 @@ import (
 	"github.com/AdanJSuarez/form3/pkg/model"
 )
 
-const httpResponseNilError = "http response is nil"
+const (
+	httpResponseNilError = "http response is nil"
+	versionParam         = "version"
+)
 
 var emptyDataModel = model.DataModel{}
 
@@ -54,7 +57,7 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 }
 
 func (a *Account) Delete(accountID string, version int) error {
-	response, err := a.client.Delete(accountID, "version", fmt.Sprint(version))
+	response, err := a.client.Delete(accountID, versionParam, fmt.Sprint(version))
 	if err != nil {
 		return err
 	}

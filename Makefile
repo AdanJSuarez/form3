@@ -24,14 +24,14 @@ test:
 
 .PHONY: testmock
 testmock:
-	@echo "==> Generating mocks and then run unit test altogether 🏀 <=="
+	@echo "==> Generating mocks and then run unit tests 🏀 <=="
 	make mock
 	make test
 
 .PHONY: integration
 integration:
 	@echo "==> Running Integration Test 🎵 <=="
-	go test ./integration
+	go test -v ./integration
 
 .PHONE: clean
 clean:

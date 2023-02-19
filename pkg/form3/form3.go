@@ -1,8 +1,8 @@
 package form3
 
 import (
-	"github.com/AdanJSuarez/form3/internal/account"
 	"github.com/AdanJSuarez/form3/internal/configuration"
+	"github.com/AdanJSuarez/form3/pkg/account"
 )
 
 type Form3 struct {
@@ -24,7 +24,6 @@ func (f *Form3) ConfigurationByValue(rawBaseURL, accountPath string) error {
 	return nil
 }
 
-// ConfigurationByEnv returns error: Not implemented (for simplicity)
 func (f *Form3) ConfigurationByEnv() error {
 	if err := f.configuration.InitializeByEnv(); err != nil {
 		return err
