@@ -47,6 +47,10 @@ If the Mockery installation fails for any reason when creating the image after `
 Like with mocks, there is a discussion of committing the dependencies or not to your repo. At the end, it depends of the team.
 I saw in your client [repo](https://github.com/form3tech-oss/go-form3) you included it, therefore I took the same approach.
 
+## Function/Method Documentation
+
+I saw in your public repos that you don't usually document the function/methods, not even the public ones -mainly, some are- There are different approaches to function documentation and like the other things that is a team decision. I decide to document the public interface for Account. This is a library and for me at least the public functionality should be documented.
+
 # Production readiness
 ## Configuration
 
