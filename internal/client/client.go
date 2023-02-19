@@ -4,16 +4,16 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/AdanJSuarez/form3/internal/client/errorhandler"
 	"github.com/AdanJSuarez/form3/internal/client/httpclient"
 	"github.com/AdanJSuarez/form3/internal/client/request"
-	"github.com/AdanJSuarez/form3/internal/client/statushandler"
 )
 
 type Client struct {
 	clientURL      url.URL
 	httpClient     httpClient
 	requestHandler requestHandler
-	statusHandler  statusHandler
+	errorHandler   errorHandler
 }
 
 func New(clientURL url.URL) *Client {
@@ -21,7 +21,7 @@ func New(clientURL url.URL) *Client {
 		clientURL:      clientURL,
 		httpClient:     httpclient.New(),
 		requestHandler: request.NewRequestHandler(),
-		statusHandler:  statushandler.NewStatusHandler(),
+		errorHandler:   errorhandler.NewErrorHandler(),
 	}
 }
 
@@ -36,7 +36,16 @@ func (c *Client) Get(value string) (*http.Response, error) {
 		return nil, err
 	}
 
-	return c.httpClient.Get(request)
+	response, err := c.httpClient.Get(request)
+	if err != nil {
+		return c.errorHandler.Error(request, err)
+	}
+
+	if !c.statusOK(response) {
+		return c.errorHandler.StatusError(request, response)
+	}
+
+	return response, nil
 }
 
 func (c *Client) Post(data interface{}) (*http.Response, error) {
@@ -47,7 +56,11 @@ func (c *Client) Post(data interface{}) (*http.Response, error) {
 
 	response, err := c.httpClient.Post(request)
 	if err != nil {
-		return response, err
+		return c.errorHandler.Error(request, err)
+	}
+
+	if !c.statusCreated(response) {
+		return c.errorHandler.StatusError(request, response)
 	}
 
 	return response, nil
@@ -65,24 +78,42 @@ func (c *Client) Delete(value, parameterKey, parameterValue string) (*http.Respo
 	}
 	c.requestHandler.SetQuery(request, parameterKey, parameterValue)
 
-	return c.httpClient.Delete(request)
+	response, err := c.httpClient.Delete(request)
+	if err != nil {
+		return c.errorHandler.Error(request, err)
+	}
+
+	if !c.statusNoContent(response) {
+		return c.errorHandler.StatusError(request, response)
+	}
+
+	return response, nil
 }
 
-func (c *Client) StatusCreated(response *http.Response) bool {
-	return c.statusHandler.StatusCreated(response)
+func (c *Client) statusCreated(response *http.Response) bool {
+	if response == nil {
+		return false
+	}
+	return response.StatusCode == http.StatusCreated
 }
 
-func (c *Client) StatusOK(response *http.Response) bool {
-	return c.statusHandler.StatusOK(response)
+func (c *Client) statusOK(response *http.Response) bool {
+	if response == nil {
+		return false
+	}
+	return response.StatusCode == http.StatusOK
 }
 
-func (c *Client) StatusNoContent(response *http.Response) bool {
-	return c.statusHandler.StatusNoContent(response)
+func (c *Client) statusNoContent(response *http.Response) bool {
+	if response == nil {
+		return false
+	}
+	return response.StatusCode == http.StatusNoContent
 }
 
-func (c *Client) HandleError(response *http.Response) error {
-	return c.statusHandler.HandleError(response)
-}
+// func (c *Client) HandleError(response *http.Response) error {
+// 	return c.errorHandler.HandleStatusError(response)
+// }
 
 func (c *Client) joinValuesToURL(values ...string) (string, error) {
 	url, err := url.JoinPath(c.clientURL.String(), values...)

@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	timeout = 10 * time.Second
+	//TODO: timeout = 10 * time.Second
+	timeout = 1 * time.Microsecond
 )
 
 type HTTPClient struct {

@@ -6,7 +6,7 @@ import (
 
 //go:generate mockery --inpackage --name=httpClient
 //go:generate mockery --inpackage --name=requestHandler
-//go:generate mockery --inpackage --name=statusHandler
+//go:generate mockery --inpackage --name=errorHandler
 
 type httpClient interface {
 	Get(request *http.Request) (*http.Response, error)
@@ -19,9 +19,10 @@ type requestHandler interface {
 	SetQuery(request *http.Request, parameterKey, parameterValue string)
 }
 
-type statusHandler interface {
-	StatusCreated(response *http.Response) bool
-	StatusOK(response *http.Response) bool
-	StatusNoContent(response *http.Response) bool
-	HandleError(response *http.Response) error
+type errorHandler interface {
+	// StatusCreated(response *http.Response) bool
+	// StatusOK(response *http.Response) bool
+	// StatusNoContent(response *http.Response) bool
+	StatusError(request *http.Request, response *http.Response) (*http.Response, error)
+	Error(request *http.Request, err error) (*http.Response, error)
 }

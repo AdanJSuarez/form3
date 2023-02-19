@@ -1,59 +1,69 @@
-package statushandler
+package errorhandler
 
 import (
 	"fmt"
 	"net/http"
+	"os"
 
-	"github.com/AdanJSuarez/form3/internal/client/statushandler/handler"
+	"github.com/AdanJSuarez/form3/internal/client/errorhandler/handler"
 )
 
 // Ref: https://refactoring.guru/design-patterns/chain-of-responsibility
 
 const nilResponseError = "http response is nil"
 
-type StatusHandler struct {
+type ErrorHandler struct {
 	next handler.StatusErrorHandler
 }
 
 // TODO: Implement Retry
 
-func NewStatusHandler() *StatusHandler {
-	sh := &StatusHandler{}
+func NewErrorHandler() *ErrorHandler {
+	sh := &ErrorHandler{}
 	uncoveredStatus := handler.NewUncoveredHandler()
 	chainOfResponsibilityErrors := sh.chainOfResponsibilityErrors(uncoveredStatus)
 	sh.next = chainOfResponsibilityErrors
 	return sh
 }
 
-func (s *StatusHandler) StatusCreated(response *http.Response) bool {
+// func (s *ErrorHandler) StatusCreated(response *http.Response) bool {
+// 	if response == nil {
+// 		return false
+// 	}
+// 	return response.StatusCode == http.StatusCreated
+// }
+
+// func (s *ErrorHandler) StatusOK(response *http.Response) bool {
+// 	if response == nil {
+// 		return false
+// 	}
+// 	return response.StatusCode == http.StatusOK
+// }
+
+// func (s *ErrorHandler) StatusNoContent(response *http.Response) bool {
+// 	if response == nil {
+// 		return false
+// 	}
+// 	return response.StatusCode == http.StatusNoContent
+// }
+
+func (s *ErrorHandler) StatusError(request *http.Request, response *http.Response) (*http.Response, error) {
 	if response == nil {
-		return false
+		return nil, fmt.Errorf(nilResponseError)
 	}
-	return response.StatusCode == http.StatusCreated
+	return nil, s.next.Execute(response)
 }
 
-func (s *StatusHandler) StatusOK(response *http.Response) bool {
-	if response == nil {
-		return false
+func (s *ErrorHandler) Error(request *http.Request, err error) (*http.Response, error) {
+	//TODO: Implement HandleError
+	if os.IsTimeout(err) {
+		// Implement retry mechanism
+		return nil, fmt.Errorf("not implemented retry mechanism: %v", err)
 	}
-	return response.StatusCode == http.StatusOK
+	return nil, err
 }
 
-func (s *StatusHandler) StatusNoContent(response *http.Response) bool {
-	if response == nil {
-		return false
-	}
-	return response.StatusCode == http.StatusNoContent
-}
-
-func (s *StatusHandler) HandleError(response *http.Response) error {
-	if response == nil {
-		return fmt.Errorf(nilResponseError)
-	}
-	return s.next.Execute(response)
-}
-
-func (s *StatusHandler) chainOfResponsibilityErrors(otherHandler handler.StatusErrorHandler) handler.StatusErrorHandler {
+func (s *ErrorHandler) chainOfResponsibilityErrors(otherHandler handler.StatusErrorHandler) handler.StatusErrorHandler {
 	gatewayTimeout := handler.NewGatewayTimeoutHandler()
 	serviceUnavailable := handler.NewServiceUnavailableHandler()
 	badGateway := handler.NewBadGatewayHandler()

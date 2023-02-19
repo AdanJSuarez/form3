@@ -23,7 +23,7 @@ var (
 	clientURLTest       *url.URL
 	clientTest          *Client
 	httpClientMock      *mockHttpClient
-	statusHandlerMock   *mockStatusHandler
+	errorHandlerMock    *mockErrorHandler
 	requestHandlerMock  *mockRequestHandler
 	dataTest            = "{data: {moreData: 55}}"
 	dataBytesMarshal, _ = json.Marshal(dataTest)
@@ -68,10 +68,10 @@ func (ts *TSClient) BeforeTest(_, _ string) {
 	clientURLTest, _ = url.ParseRequestURI(rawBaseURLTest)
 	clientTest = New(*clientURLTest)
 	httpClientMock = new(mockHttpClient)
-	statusHandlerMock = new(mockStatusHandler)
+	errorHandlerMock = new(mockErrorHandler)
 	requestHandlerMock = new(mockRequestHandler)
 	clientTest.httpClient = httpClientMock
-	clientTest.statusHandler = statusHandlerMock
+	clientTest.errorHandler = errorHandlerMock
 	clientTest.requestHandler = requestHandlerMock
 	ts.IsType(new(Client), clientTest)
 }
@@ -179,37 +179,37 @@ func (ts *TSClient) TestInvalidDelete() {
 }
 
 func (ts *TSClient) TestTrueStatusCreated() {
-	statusHandlerMock.On("StatusCreated", mock.Anything).Return(true)
-	actual := clientTest.StatusCreated(&responsePostTest)
+	errorHandlerMock.On("StatusCreated", mock.Anything).Return(true)
+	actual := clientTest.statusCreated(&responsePostTest)
 	ts.True(actual)
 }
 func (ts *TSClient) TestFalseStatusCreated() {
-	statusHandlerMock.On("StatusCreated", mock.Anything).Return(false)
-	actual := clientTest.StatusCreated(&responsePostTest)
+	errorHandlerMock.On("StatusCreated", mock.Anything).Return(false)
+	actual := clientTest.statusCreated(&responsePostTest)
 	ts.False(actual)
 }
 
 func (ts *TSClient) TestTrueStatusOK() {
-	statusHandlerMock.On("StatusOK", mock.Anything).Return(true)
-	actual := clientTest.StatusOK(&responseGetTest)
+	errorHandlerMock.On("StatusOK", mock.Anything).Return(true)
+	actual := clientTest.statusOK(&responseGetTest)
 	ts.True(actual)
 }
 
 func (ts *TSClient) TestFalseStatusOK() {
-	statusHandlerMock.On("StatusOK", mock.Anything).Return(false)
-	actual := clientTest.StatusOK(&responseGetTest)
+	errorHandlerMock.On("StatusOK", mock.Anything).Return(false)
+	actual := clientTest.statusOK(&responseGetTest)
 	ts.False(actual)
 }
 
 func (ts *TSClient) TestTrueStatusNoContent() {
-	statusHandlerMock.On("StatusNoContent", mock.Anything).Return(true)
-	actual := clientTest.StatusNoContent(&responseDeleteTest)
+	errorHandlerMock.On("StatusNoContent", mock.Anything).Return(true)
+	actual := clientTest.statusNoContent(&responseDeleteTest)
 	ts.True(actual)
 }
 
 func (ts *TSClient) TestFalseStatusNoContent() {
-	statusHandlerMock.On("StatusNoContent", mock.Anything).Return(false)
-	actual := clientTest.StatusNoContent(&responseDeleteTest)
+	errorHandlerMock.On("StatusNoContent", mock.Anything).Return(false)
+	actual := clientTest.statusNoContent(&responseDeleteTest)
 	ts.False(actual)
 }
 
