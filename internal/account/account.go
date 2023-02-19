@@ -18,7 +18,6 @@ type Account struct {
 	client Client
 }
 
-// New returns a pointer of Account initialized
 func New(baseURL url.URL, accountPath string) *Account {
 	account := &Account{}
 	accountURL := account.accountURL(baseURL, accountPath)
