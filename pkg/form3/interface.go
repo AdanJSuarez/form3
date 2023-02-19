@@ -10,14 +10,26 @@ import (
 //go:generate mockery --inpackage --name=Configuration
 
 type Account interface {
-	// Create creates an bank account and returns the account values.
-	// It returns an error otherwise.
+	/*
+		Create creates an bank account and returns the account values.
+		It returns an error otherwise.
+
+		For more reference about model.DataModel, please check form3 API documentation.
+	*/
 	Create(data model.DataModel) (model.DataModel, error)
-	// Fetch retrieves the account information for the specific account ID.
-	// It returns an error otherwise.
+	/*
+		Fetch retrieves the account information for the specific account ID.
+		It returns an error otherwise.
+
+		For more reference about model.DataModel and accountID, please check form3 API documentation.
+	*/
 	Fetch(accountID string) (model.DataModel, error)
-	// Delete deletes an account by its ID and version number.
-	// It returns an error otherwise.
+	/*
+		Delete deletes an account by its ID and version number.
+		It returns an error otherwise.
+
+		For more reference about accountID and version, please check form3 API documentation.
+	*/
 	Delete(accountID string, version int) error
 }
 

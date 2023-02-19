@@ -37,7 +37,7 @@ func (ts *TSRequest) BeforeTest(_, _ string) {
 
 func (ts *TSRequest) TestBody() {
 	requestTest.Request(dataTest, http.MethodGet, requestURLTest, hostTest)
-	body := requestTest.Body()
+	body := requestTest.body
 	ts.Equal(bodyTest, body)
 }
 
@@ -55,7 +55,7 @@ func (ts *TSRequest) TestDigest() {
 }
 func (ts *TSRequest) TestNilBody() {
 	requestTest.Request(nil, http.MethodGet, requestURLTest, hostTest)
-	body := requestTest.Body()
+	body := requestTest.body
 	ts.Nil(body)
 }
 

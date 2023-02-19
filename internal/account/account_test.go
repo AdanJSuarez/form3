@@ -2,13 +2,13 @@ package account
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"testing"
 
-	"github.com/AdanJSuarez/form3/internal/client/request"
 	"github.com/AdanJSuarez/form3/pkg/model"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -46,7 +46,7 @@ var (
 	dataModelResponse = model.DataModel{
 		Data: dataTest,
 	}
-	returnedBodyError = io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError")))
+	dataModelByte, _ = json.Marshal(dataModelResponse)
 )
 
 type TSAccount struct{ suite.Suite }
@@ -59,17 +59,16 @@ func (ts *TSAccount) BeforeTest(_, _ string) {
 	accountTest = New(*baseURLTest, accountPath)
 	ts.IsType(new(Account), accountTest)
 	clientMock = new(MockClient)
+	accountTest.client = clientMock
 }
 
 func (ts *TSAccount) TestCreateValidDataModel() {
-	req := request.NewRequestHandler(dataModelResponse)
 	res := &http.Response{
 		StatusCode: 201,
-		Body:       req.Body(),
+		Body:       io.NopCloser(bytes.NewBuffer(dataModelByte)),
 	}
 	clientMock.On("Post", mock.Anything).Return(res, nil)
-	clientMock.On("StatusCreated", mock.AnythingOfType("*http.Response")).Return(true)
-	accountTest.client = clientMock
+	clientMock.On("StatusCreated", mock.Anything).Return(true)
 
 	data, err := accountTest.Create(dataModelRequest)
 	ts.NoError(err)
@@ -79,21 +78,19 @@ func (ts *TSAccount) TestCreateValidDataModel() {
 func (ts *TSAccount) TestCreateInvalidDataModel() {
 	res := &http.Response{
 		StatusCode: 400,
-		Body:       returnedBodyError,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
 	clientMock.On("Post", mock.Anything).Return(res, nil)
-	clientMock.On("StatusCreated", mock.AnythingOfType("*http.Response")).Return(false)
-	clientMock.On("HandleError", mock.AnythingOfType("*http.Response")).Return(fmt.Errorf("status code 400: fakeError"))
-	accountTest.client = clientMock
+	clientMock.On("StatusCreated", mock.Anything).Return(false)
+	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 400: fakeError"))
 
 	data, err := accountTest.Create(model.DataModel{})
 	ts.ErrorContains(err, "status code 400:")
 	ts.Empty(data)
 }
 
-func (ts *TSAccount) TestCreateNilResponse() {
+func (ts *TSAccount) TestCreateNilResponseWithError() {
 	clientMock.On("Post", mock.Anything).Return(nil, fmt.Errorf("fakeError"))
-	accountTest.client = clientMock
 	data, err := accountTest.Create(dataModelRequest)
 	ts.ErrorContains(err, "fakeError")
 	ts.Empty(data)
@@ -102,26 +99,23 @@ func (ts *TSAccount) TestCreateNilResponse() {
 func (ts *TSAccount) TestCreateDecodeError() {
 	res := &http.Response{
 		StatusCode: 201,
-		Body:       returnedBodyError,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
 	clientMock.On("Post", mock.Anything).Return(res, nil)
-	clientMock.On("StatusCreated", mock.AnythingOfType("*http.Response")).Return(true)
-	accountTest.client = clientMock
+	clientMock.On("StatusCreated", mock.Anything).Return(true)
 
 	data, err := accountTest.Create(dataModelRequest)
-	ts.Error(err)
+	ts.ErrorContains(err, "invalid character")
 	ts.Empty(data)
 }
 
 func (ts *TSAccount) TestFetchValidAccount() {
-	req := request.NewRequestHandler(dataModelResponse)
 	res := &http.Response{
 		StatusCode: 200,
-		Body:       req.Body(),
+		Body:       io.NopCloser(bytes.NewBuffer(dataModelByte)),
 	}
-	clientMock.On("Get", mock.AnythingOfType("string")).Return(res, nil)
-	clientMock.On("StatusOK", mock.AnythingOfType("*http.Response")).Return(true)
-	accountTest.client = clientMock
+	clientMock.On("Get", mock.Anything).Return(res, nil)
+	clientMock.On("StatusOK", mock.Anything).Return(true)
 
 	data, err := accountTest.Fetch("fakeID")
 	ts.NoError(err)
@@ -131,24 +125,22 @@ func (ts *TSAccount) TestFetchValidAccount() {
 func (ts *TSAccount) TestFetchInvalidAccount() {
 	res := &http.Response{
 		StatusCode: 404,
-		Body:       returnedBodyError,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
 	clientMock.On("Get", mock.AnythingOfType("string")).Return(res, nil)
-	clientMock.On("StatusOK", mock.AnythingOfType("*http.Response")).Return(false)
-	clientMock.On("HandleError", mock.AnythingOfType("*http.Response")).Return(fmt.Errorf("status code 404: fakeError"))
-	accountTest.client = clientMock
+	clientMock.On("StatusOK", mock.Anything).Return(false)
+	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 404: fakeErrorFetch"))
 
 	data, err := accountTest.Fetch("fakeID")
-	ts.ErrorContains(err, "status code 404:")
+	ts.ErrorContains(err, "status code 404: fakeErrorFetch")
 	ts.Empty(data)
 }
 
 func (ts *TSAccount) TestFetchErrorReturned() {
-	clientMock.On("Get", mock.AnythingOfType("string")).Return(nil, fmt.Errorf("fakeErrorReturned"))
-	accountTest.client = clientMock
+	clientMock.On("Get", mock.Anything).Return(nil, fmt.Errorf("fakeErrorReturnedOnFetch"))
 
 	data, err := accountTest.Fetch("fakeID")
-	ts.ErrorContains(err, "fakeErrorReturned")
+	ts.ErrorContains(err, "fakeErrorReturnedOnFetch")
 	ts.Empty(data)
 }
 
@@ -157,12 +149,11 @@ func (ts *TSAccount) TestFetchDecodeError() {
 		StatusCode: 200,
 		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
-	clientMock.On("Get", mock.AnythingOfType("string")).Return(res, nil)
-	clientMock.On("StatusOK", mock.AnythingOfType("*http.Response")).Return(true)
-	accountTest.client = clientMock
+	clientMock.On("Get", mock.Anything).Return(res, nil)
+	clientMock.On("StatusOK", mock.Anything).Return(true)
 
 	data, err := accountTest.Fetch("fakeID")
-	ts.Error(err)
+	ts.ErrorContains(err, "invalid character")
 	ts.Empty(data)
 }
 
@@ -172,8 +163,7 @@ func (ts *TSAccount) TestDeleteValidAccount() {
 		Body:       nil,
 	}
 	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
-	clientMock.On("StatusNoContent", mock.AnythingOfType("*http.Response")).Return(true)
-	accountTest.client = clientMock
+	clientMock.On("StatusNoContent", mock.Anything).Return(true)
 
 	err := accountTest.Delete("fakeID", 0)
 	ts.NoError(err)
@@ -185,9 +175,8 @@ func (ts *TSAccount) TestDeleteInvalidAccount() {
 		Body:       nil,
 	}
 	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
-	clientMock.On("StatusNoContent", mock.AnythingOfType("*http.Response")).Return(false)
+	clientMock.On("StatusNoContent", mock.Anything).Return(false)
 	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 404: fakeError"))
-	accountTest.client = clientMock
 
 	err := accountTest.Delete("fakeID", 0)
 	ts.ErrorContains(err, "status code 404:")
@@ -199,50 +188,46 @@ func (ts *TSAccount) TestDeleteInvalidVersion() {
 		Body:       nil,
 	}
 	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
-	clientMock.On("StatusNoContent", mock.AnythingOfType("*http.Response")).Return(false)
+	clientMock.On("StatusNoContent", mock.Anything).Return(false)
 	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 404: fakeError"))
-	accountTest.client = clientMock
 
 	err := accountTest.Delete("fakeID", 7)
 	ts.ErrorContains(err, "status code 404:")
 }
 
 func (ts *TSAccount) TestDecodeResponse() {
-	reqBody := request.NewRequestHandler(dataModelResponse)
 	res := &http.Response{
 		StatusCode: 200,
-		Body:       reqBody.Body(),
+		Body:       io.NopCloser(bytes.NewBuffer(dataModelByte)),
 	}
 	data, err := accountTest.decodeResponse(res)
 	ts.NoError(err)
 	ts.Equal(dataModelResponse, data)
 }
 func (ts *TSAccount) TestDecodeResponseInvalid() {
-	reqBody := request.NewRequestHandler("SantaUrsulaCapitalDelUniverso")
 	res := &http.Response{
 		StatusCode: 200,
-		Body:       reqBody.Body(),
+		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
 	data, err := accountTest.decodeResponse(res)
-	ts.Error(err)
+	ts.ErrorContains(err, "invalid character")
 	ts.Empty(data)
 }
 
 func (ts *TSAccount) TestDecodeResponseNilResponse() {
 	data, err := accountTest.decodeResponse(nil)
-	ts.Error(err)
+	ts.ErrorContains(err, "http response is nil")
 	ts.Empty(data)
 }
 
 func (ts *TSAccount) TestCloseBody() {
-	reqBody := request.NewRequestHandler(dataModelResponse)
 	req := &http.Response{
 		StatusCode: 200,
-		Body:       reqBody.Body(),
+		Body:       io.NopCloser(bytes.NewBuffer(dataModelByte)),
 	}
 	ts.NotPanics(func() { accountTest.closeBody(req) })
 }
-func (ts *TSAccount) TestCloseBodyNilBody() {
+func (ts *TSAccount) TestCloseBodyNilBodyNoPanic() {
 	req := &http.Response{
 		StatusCode: 200,
 		Body:       nil,
@@ -250,6 +235,6 @@ func (ts *TSAccount) TestCloseBodyNilBody() {
 	ts.NotPanics(func() { accountTest.closeBody(req) })
 }
 
-func (ts *TSAccount) TestCloseBodyNilResponse() {
+func (ts *TSAccount) TestCloseBodyNilResponseNoPanic() {
 	ts.NotPanics(func() { accountTest.closeBody(nil) })
 }

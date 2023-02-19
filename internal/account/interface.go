@@ -15,10 +15,3 @@ type Client interface {
 	StatusNoContent(response *http.Response) bool
 	HandleError(response *http.Response) error
 }
-
-// type StatusHandler interface {
-// 	StatusCreated(response *http.Response) bool
-// 	StatusOK(response *http.Response) bool
-// 	StatusNoContent(response *http.Response) bool
-// 	HandleError(response *http.Response) error
-// }

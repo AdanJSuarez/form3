@@ -33,10 +33,6 @@ func NewRequestHandler() *RequestHandler {
 	return &RequestHandler{}
 }
 
-func (r *RequestHandler) Body() io.ReadCloser {
-	return r.body
-}
-
 func (r *RequestHandler) Request(data interface{}, method, url, host string) (*http.Request, error) {
 	r.setRawDataAndBody(data)
 	request, err := http.NewRequest(method, url, r.body)

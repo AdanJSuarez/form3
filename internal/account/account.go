@@ -64,7 +64,7 @@ func (a *Account) Delete(accountID string, version int) error {
 		return a.client.HandleError(response)
 	}
 
-	return err
+	return nil
 }
 
 func (a *Account) accountURL(baseURL url.URL, accountPath string) url.URL {
