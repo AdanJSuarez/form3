@@ -1,4 +1,4 @@
-package errorhandler
+package statuserrorhandler
 
 import (
 	"fmt"

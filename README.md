@@ -59,7 +59,7 @@ To set those parameters I implemented two different ways. One is setting them as
 
 ## Retry mechanism
 
-The API documentation encourage us to implement a [retry mechanism](https://www.api-docs.form3.tech/api/schemes/sepa-instant-credit-transfer/introduction/timeouts/retry-strategy) on failure. This could be implemented in the client library. I did some test running 10000 concurrent requests against the fake API and instead of receiving 429 I received 500 and, in my case, the dockers got unresponsive after that so I couldn't test it properly and all the following tests never passed, so I decide to not implement it for simplicity, but it is definitely a needed feature for production readiness.
+The API documentation encourage us to implement a [retry mechanism](https://www.api-docs.form3.tech/api/schemes/sepa-instant-credit-transfer/introduction/timeouts/retry-strategy) on failure. I implemented a basic Retry and unit-tested it.
 
 ## Headers
 

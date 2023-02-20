@@ -6,6 +6,7 @@ import (
 
 	"github.com/AdanJSuarez/form3/internal/client/httpclient"
 	"github.com/AdanJSuarez/form3/internal/client/request"
+	"github.com/AdanJSuarez/form3/internal/client/statuserrorhandler"
 )
 
 type Client struct {

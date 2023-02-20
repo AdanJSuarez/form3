@@ -68,7 +68,6 @@ func (ts *TSAccount) TestCreateValidDataModel() {
 		Body:       io.NopCloser(bytes.NewBuffer(dataModelByte)),
 	}
 	clientMock.On("Post", mock.Anything).Return(res, nil)
-	clientMock.On("StatusCreated", mock.Anything).Return(true)
 
 	data, err := accountTest.Create(dataModelRequest)
 	ts.NoError(err)
@@ -81,8 +80,6 @@ func (ts *TSAccount) TestCreateInvalidDataModel() {
 		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
 	clientMock.On("Post", mock.Anything).Return(res, nil)
-	clientMock.On("StatusCreated", mock.Anything).Return(false)
-	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 400: fakeError"))
 
 	data, err := accountTest.Create(model.DataModel{})
 	ts.ErrorContains(err, "invalid character")
@@ -102,7 +99,6 @@ func (ts *TSAccount) TestCreateDecodeError() {
 		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
 	clientMock.On("Post", mock.Anything).Return(res, nil)
-	clientMock.On("StatusCreated", mock.Anything).Return(true)
 
 	data, err := accountTest.Create(dataModelRequest)
 	ts.ErrorContains(err, "invalid character")
@@ -115,7 +111,6 @@ func (ts *TSAccount) TestFetchValidAccount() {
 		Body:       io.NopCloser(bytes.NewBuffer(dataModelByte)),
 	}
 	clientMock.On("Get", mock.Anything).Return(res, nil)
-	clientMock.On("StatusOK", mock.Anything).Return(true)
 
 	data, err := accountTest.Fetch("fakeID")
 	ts.NoError(err)
@@ -128,8 +123,6 @@ func (ts *TSAccount) TestFetchInvalidAccount() {
 		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
 	clientMock.On("Get", mock.AnythingOfType("string")).Return(res, nil)
-	clientMock.On("StatusOK", mock.Anything).Return(false)
-	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 404: fakeErrorFetch"))
 
 	data, err := accountTest.Fetch("fakeID")
 	ts.ErrorContains(err, "status code 404: fakeErrorFetch")
@@ -150,7 +143,6 @@ func (ts *TSAccount) TestFetchDecodeError() {
 		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
 	}
 	clientMock.On("Get", mock.Anything).Return(res, nil)
-	clientMock.On("StatusOK", mock.Anything).Return(true)
 
 	data, err := accountTest.Fetch("fakeID")
 	ts.ErrorContains(err, "invalid character")
@@ -163,7 +155,6 @@ func (ts *TSAccount) TestDeleteValidAccount() {
 		Body:       nil,
 	}
 	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
-	clientMock.On("StatusNoContent", mock.Anything).Return(true)
 
 	err := accountTest.Delete("fakeID", 0)
 	ts.NoError(err)
@@ -175,8 +166,6 @@ func (ts *TSAccount) TestDeleteInvalidAccount() {
 		Body:       nil,
 	}
 	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
-	clientMock.On("StatusNoContent", mock.Anything).Return(false)
-	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 404: fakeError"))
 
 	err := accountTest.Delete("fakeID", 0)
 	ts.ErrorContains(err, "status code 404:")
@@ -188,8 +177,6 @@ func (ts *TSAccount) TestDeleteInvalidVersion() {
 		Body:       nil,
 	}
 	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
-	clientMock.On("StatusNoContent", mock.Anything).Return(false)
-	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 404: fakeError"))
 
 	err := accountTest.Delete("fakeID", 7)
 	ts.ErrorContains(err, "status code 404:")

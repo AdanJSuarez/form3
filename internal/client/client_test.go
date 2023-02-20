@@ -20,14 +20,14 @@ const (
 )
 
 var (
-	clientURLTest       *url.URL
-	clientTest          *Client
-	httpClientMock      *mockHttpClient
-	errorHandlerMock    *mockErrorHandler
-	requestHandlerMock  *mockRequestHandler
-	dataTest            = "{data: {moreData: 55}}"
-	dataBytesMarshal, _ = json.Marshal(dataTest)
-	requestGetTest      = http.Request{
+	clientURLTest          *url.URL
+	clientTest             *Client
+	httpClientMock         *mockHttpClient
+	statusErrorHandlerMock *mockStatusErrorHandler
+	requestHandlerMock     *mockRequestHandler
+	dataTest               = "{data: {moreData: 55}}"
+	dataBytesMarshal, _    = json.Marshal(dataTest)
+	requestGetTest         = http.Request{
 		Method: http.MethodGet,
 	}
 	requestPostTest = http.Request{
@@ -68,10 +68,10 @@ func (ts *TSClient) BeforeTest(_, _ string) {
 	clientURLTest, _ = url.ParseRequestURI(rawBaseURLTest)
 	clientTest = New(*clientURLTest)
 	httpClientMock = new(mockHttpClient)
-	errorHandlerMock = new(mockErrorHandler)
+	statusErrorHandlerMock = new(mockStatusErrorHandler)
 	requestHandlerMock = new(mockRequestHandler)
 	clientTest.httpClient = httpClientMock
-	clientTest.statusErrorHandler = errorHandlerMock
+	clientTest.statusErrorHandler = statusErrorHandlerMock
 	clientTest.requestHandler = requestHandlerMock
 	ts.IsType(new(Client), clientTest)
 }
@@ -85,17 +85,17 @@ func (ts *TSClient) TestValidGet() {
 	ts.Equal(&responseGetTest, response)
 }
 
-func (ts *TSClient) TestValidGetNotFound() {
+func (ts *TSClient) TestGetReturnNotFound() {
 	httpClientMock.On("SendRequest", mock.Anything).Return(&responseNotFoundTest, nil)
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestGetTest, nil)
-
+	statusErrorHandlerMock.On("StatusError", mock.Anything).Return(nil, fmt.Errorf("not found"))
 	response, err := clientTest.Get(idTest)
-	ts.NoError(err)
-	ts.Equal(&responseNotFoundTest, response)
+	ts.ErrorContains(err, "not found")
+	ts.Nil(response)
 }
 
-func (ts *TSClient) TestErrorGet() {
+func (ts *TSClient) TestGetWithErrorOnSendRequest() {
 	httpClientMock.On("SendRequest", mock.Anything).Return(nil, fmt.Errorf("fakeError1"))
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestGetTest, nil)
@@ -105,7 +105,7 @@ func (ts *TSClient) TestErrorGet() {
 	ts.Nil(response)
 }
 
-func (ts *TSClient) TestRequestErrorGet() {
+func (ts *TSClient) TestGetWithErrorOnRequest() {
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(nil, fmt.Errorf("fakeErrorRequest"))
 
@@ -123,7 +123,7 @@ func (ts *TSClient) TestValidPost() {
 	ts.Equal(&responsePostTest, response)
 }
 
-func (ts *TSClient) TestErrorPost() {
+func (ts *TSClient) TestPostWithErrorOnSendRequest() {
 	httpClientMock.On("SendRequest", mock.Anything).Return(nil, fmt.Errorf("fakeError2"))
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestPostTest, nil)
@@ -132,7 +132,7 @@ func (ts *TSClient) TestErrorPost() {
 	ts.Nil(response)
 }
 
-func (ts *TSClient) TestRequestErrorPost() {
+func (ts *TSClient) TestPostWithErrorOnRequest() {
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(nil, fmt.Errorf("fakeErrorRequest2"))
 	response, err := clientTest.Post(idTest)
@@ -150,7 +150,7 @@ func (ts *TSClient) TestValidDelete() {
 	ts.Equal(&responseDeleteTest, response)
 }
 
-func (ts *TSClient) TestErrorRequestDelete() {
+func (ts *TSClient) TestDeleteWithErrorOnRequest() {
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(nil, fmt.Errorf("fakeErrorRequestDelete"))
 	response, err := clientTest.Delete(idTest, "version", "0")
@@ -158,17 +158,18 @@ func (ts *TSClient) TestErrorRequestDelete() {
 	ts.Nil(response)
 }
 
-func (ts *TSClient) TestValidDeleteNotFound() {
+func (ts *TSClient) TestDeleteReturnNotFound() {
 	httpClientMock.On("SendRequest", mock.Anything, mock.Anything, mock.Anything).Return(&responseNotFoundTest, nil)
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestDeleteTest, nil)
 	requestHandlerMock.On("SetQuery", mock.Anything, mock.Anything, mock.Anything).Return()
+	statusErrorHandlerMock.On("StatusError", mock.Anything).Return(nil, fmt.Errorf("not found"))
 	response, err := clientTest.Delete(idTest, "version", "0")
-	ts.NoError(err)
-	ts.Equal(&responseNotFoundTest, response)
+	ts.ErrorContains(err, "not found")
+	ts.Nil(response)
 }
 
-func (ts *TSClient) TestInvalidDelete() {
+func (ts *TSClient) TestDeleteWithErrorOnSendRequest() {
 	httpClientMock.On("SendRequest", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fakeErrorDelete"))
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestDeleteTest, nil)
@@ -178,38 +179,45 @@ func (ts *TSClient) TestInvalidDelete() {
 	ts.Nil(response)
 }
 
-func (ts *TSClient) TestTrueStatusCreated() {
-	errorHandlerMock.On("StatusCreated", mock.Anything).Return(true)
+func (ts *TSClient) TestStatusCreatedTrue() {
 	actual := clientTest.statusCreated(&responsePostTest)
 	ts.True(actual)
 }
-func (ts *TSClient) TestFalseStatusCreated() {
-	errorHandlerMock.On("StatusCreated", mock.Anything).Return(false)
-	actual := clientTest.statusCreated(&responsePostTest)
+func (ts *TSClient) TestStatusCreatedFalse() {
+	actual := clientTest.statusCreated(&responseNotFoundTest)
+	ts.False(actual)
+}
+func (ts *TSClient) TestStatusCreatedNilResponse() {
+	actual := clientTest.statusCreated(nil)
 	ts.False(actual)
 }
 
-func (ts *TSClient) TestTrueStatusOK() {
-	errorHandlerMock.On("StatusOK", mock.Anything).Return(true)
+func (ts *TSClient) TestStatusOKTrue() {
 	actual := clientTest.statusOK(&responseGetTest)
 	ts.True(actual)
 }
 
-func (ts *TSClient) TestFalseStatusOK() {
-	errorHandlerMock.On("StatusOK", mock.Anything).Return(false)
-	actual := clientTest.statusOK(&responseGetTest)
+func (ts *TSClient) TestStatusOKFalse() {
+	actual := clientTest.statusOK(&responseNotFoundTest)
+	ts.False(actual)
+}
+func (ts *TSClient) TestStatusOKNilResponse() {
+	actual := clientTest.statusOK(nil)
 	ts.False(actual)
 }
 
-func (ts *TSClient) TestTrueStatusNoContent() {
-	errorHandlerMock.On("StatusNoContent", mock.Anything).Return(true)
+func (ts *TSClient) TestStatusNoContentTrue() {
 	actual := clientTest.statusNoContent(&responseDeleteTest)
 	ts.True(actual)
 }
 
-func (ts *TSClient) TestFalseStatusNoContent() {
-	errorHandlerMock.On("StatusNoContent", mock.Anything).Return(false)
-	actual := clientTest.statusNoContent(&responseDeleteTest)
+func (ts *TSClient) TestStatusNoContentFalse() {
+	actual := clientTest.statusNoContent(&responseNotFoundTest)
+	ts.False(actual)
+}
+
+func (ts *TSClient) TestStatusNoContentNilResponse() {
+	actual := clientTest.statusNoContent(nil)
 	ts.False(actual)
 }
 

@@ -6,7 +6,7 @@ import (
 
 //go:generate mockery --inpackage --name=httpClient
 //go:generate mockery --inpackage --name=requestHandler
-//go:generate mockery --inpackage --name=errorHandler
+//go:generate mockery --inpackage --name=statusErrorHandler
 
 type httpClient interface {
 	SendRequest(request *http.Request) (*http.Response, error)
