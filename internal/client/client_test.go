@@ -71,7 +71,7 @@ func (ts *TSClient) BeforeTest(_, _ string) {
 	errorHandlerMock = new(mockErrorHandler)
 	requestHandlerMock = new(mockRequestHandler)
 	clientTest.httpClient = httpClientMock
-	clientTest.errorHandler = errorHandlerMock
+	clientTest.statusErrorHandler = errorHandlerMock
 	clientTest.requestHandler = requestHandlerMock
 	ts.IsType(new(Client), clientTest)
 }

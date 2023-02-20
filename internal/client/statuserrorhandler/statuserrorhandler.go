@@ -4,56 +4,33 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/AdanJSuarez/form3/internal/client/errorhandler/handler"
+	"github.com/AdanJSuarez/form3/internal/client/statuserrorhandler/handler"
 )
 
 // Ref: https://refactoring.guru/design-patterns/chain-of-responsibility
 
 const nilResponseError = "http response is nil"
 
-type ErrorHandler struct {
+type StatusErrorHandler struct {
 	next handler.StatusErrorHandler
 }
 
-// TODO: Implement Retry
-
-func NewErrorHandler() *ErrorHandler {
-	sh := &ErrorHandler{}
+func NewStatusErrorHandler() *StatusErrorHandler {
+	sh := &StatusErrorHandler{}
 	uncoveredStatus := handler.NewUncoveredHandler()
 	chainOfResponsibilityErrors := sh.chainOfResponsibilityErrors(uncoveredStatus)
 	sh.next = chainOfResponsibilityErrors
 	return sh
 }
 
-// func (s *ErrorHandler) StatusCreated(response *http.Response) bool {
-// 	if response == nil {
-// 		return false
-// 	}
-// 	return response.StatusCode == http.StatusCreated
-// }
-
-// func (s *ErrorHandler) StatusOK(response *http.Response) bool {
-// 	if response == nil {
-// 		return false
-// 	}
-// 	return response.StatusCode == http.StatusOK
-// }
-
-// func (s *ErrorHandler) StatusNoContent(response *http.Response) bool {
-// 	if response == nil {
-// 		return false
-// 	}
-// 	return response.StatusCode == http.StatusNoContent
-// }
-
-func (s *ErrorHandler) StatusError(response *http.Response) (*http.Response, error) {
+func (s *StatusErrorHandler) StatusError(response *http.Response) (*http.Response, error) {
 	if response == nil {
 		return nil, fmt.Errorf(nilResponseError)
 	}
 	return nil, s.next.Execute(response)
 }
 
-func (s *ErrorHandler) chainOfResponsibilityErrors(otherHandler handler.StatusErrorHandler) handler.StatusErrorHandler {
+func (s *StatusErrorHandler) chainOfResponsibilityErrors(otherHandler handler.StatusErrorHandler) handler.StatusErrorHandler {
 	gatewayTimeout := handler.NewGatewayTimeoutHandler()
 	serviceUnavailable := handler.NewServiceUnavailableHandler()
 	badGateway := handler.NewBadGatewayHandler()

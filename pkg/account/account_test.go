@@ -85,7 +85,7 @@ func (ts *TSAccount) TestCreateInvalidDataModel() {
 	clientMock.On("HandleError", mock.Anything).Return(fmt.Errorf("status code 400: fakeError"))
 
 	data, err := accountTest.Create(model.DataModel{})
-	ts.ErrorContains(err, "status code 400:")
+	ts.ErrorContains(err, "invalid character")
 	ts.Empty(data)
 }
 

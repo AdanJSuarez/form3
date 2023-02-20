@@ -4,24 +4,23 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/AdanJSuarez/form3/internal/client/errorhandler"
 	"github.com/AdanJSuarez/form3/internal/client/httpclient"
 	"github.com/AdanJSuarez/form3/internal/client/request"
 )
 
 type Client struct {
-	clientURL      url.URL
-	httpClient     httpClient
-	requestHandler requestHandler
-	errorHandler   errorHandler
+	clientURL          url.URL
+	httpClient         httpClient
+	requestHandler     requestHandler
+	statusErrorHandler statusErrorHandler
 }
 
 func New(clientURL url.URL) *Client {
 	return &Client{
-		clientURL:      clientURL,
-		httpClient:     httpclient.New(),
-		requestHandler: request.NewRequestHandler(),
-		errorHandler:   errorhandler.NewErrorHandler(),
+		clientURL:          clientURL,
+		httpClient:         httpclient.New(),
+		requestHandler:     request.NewRequestHandler(),
+		statusErrorHandler: statuserrorhandler.NewStatusErrorHandler(),
 	}
 }
 
@@ -42,7 +41,7 @@ func (c *Client) Get(value string) (*http.Response, error) {
 	}
 
 	if !c.statusOK(response) {
-		return c.errorHandler.StatusError(response)
+		return c.statusErrorHandler.StatusError(response)
 	}
 
 	return response, nil
@@ -60,7 +59,7 @@ func (c *Client) Post(data interface{}) (*http.Response, error) {
 	}
 
 	if !c.statusCreated(response) {
-		return c.errorHandler.StatusError(response)
+		return c.statusErrorHandler.StatusError(response)
 	}
 
 	return response, nil
@@ -84,7 +83,7 @@ func (c *Client) Delete(value, parameterKey, parameterValue string) (*http.Respo
 	}
 
 	if !c.statusNoContent(response) {
-		return c.errorHandler.StatusError(response)
+		return c.statusErrorHandler.StatusError(response)
 	}
 
 	return response, nil

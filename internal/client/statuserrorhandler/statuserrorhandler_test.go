@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/AdanJSuarez/form3/internal/client/errorhandler/handler"
+	"github.com/AdanJSuarez/form3/internal/client/statuserrorhandler/handler"
 	"github.com/stretchr/testify/suite"
 )
 
 var (
-	statusHandlerTest *ErrorHandler
+	statusHandlerTest *StatusErrorHandler
 	responseCreated   = &http.Response{
 		StatusCode: http.StatusCreated,
 	}
@@ -31,8 +31,8 @@ func TestRunStatusHandlerSuite(t *testing.T) {
 }
 
 func (ts *TSStatusHandler) BeforeTest(_, _ string) {
-	statusHandlerTest = NewErrorHandler()
-	ts.IsType(new(ErrorHandler), statusHandlerTest)
+	statusHandlerTest = NewStatusErrorHandler()
+	ts.IsType(new(StatusErrorHandler), statusHandlerTest)
 }
 
 func (ts *TSStatusHandler) TestNextInitialized() {

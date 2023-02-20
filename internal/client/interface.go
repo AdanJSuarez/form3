@@ -10,9 +10,6 @@ import (
 
 type httpClient interface {
 	SendRequest(request *http.Request) (*http.Response, error)
-	// Get(request *http.Request) (*http.Response, error)
-	// Post(request *http.Request) (*http.Response, error)
-	// Delete(request *http.Request) (*http.Response, error)
 }
 
 type requestHandler interface {
@@ -20,9 +17,6 @@ type requestHandler interface {
 	SetQuery(request *http.Request, parameterKey, parameterValue string)
 }
 
-type errorHandler interface {
-	// StatusCreated(response *http.Response) bool
-	// StatusOK(response *http.Response) bool
-	// StatusNoContent(response *http.Response) bool
+type statusErrorHandler interface {
 	StatusError(response *http.Response) (*http.Response, error)
 }
