@@ -9,9 +9,10 @@ import (
 //go:generate mockery --inpackage --name=errorHandler
 
 type httpClient interface {
-	Get(request *http.Request) (*http.Response, error)
-	Post(request *http.Request) (*http.Response, error)
-	Delete(request *http.Request) (*http.Response, error)
+	SendRequest(request *http.Request) (*http.Response, error)
+	// Get(request *http.Request) (*http.Response, error)
+	// Post(request *http.Request) (*http.Response, error)
+	// Delete(request *http.Request) (*http.Response, error)
 }
 
 type requestHandler interface {
@@ -23,6 +24,5 @@ type errorHandler interface {
 	// StatusCreated(response *http.Response) bool
 	// StatusOK(response *http.Response) bool
 	// StatusNoContent(response *http.Response) bool
-	StatusError(request *http.Request, response *http.Response) (*http.Response, error)
-	Error(request *http.Request, err error) (*http.Response, error)
+	StatusError(response *http.Response) (*http.Response, error)
 }

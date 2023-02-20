@@ -77,7 +77,7 @@ func (ts *TSClient) BeforeTest(_, _ string) {
 }
 
 func (ts *TSClient) TestValidGet() {
-	httpClientMock.On("Get", mock.Anything).Return(&responseGetTest, nil)
+	httpClientMock.On("SendRequest", mock.Anything).Return(&responseGetTest, nil)
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestGetTest, nil)
 	response, err := clientTest.Get(idTest)
@@ -86,7 +86,7 @@ func (ts *TSClient) TestValidGet() {
 }
 
 func (ts *TSClient) TestValidGetNotFound() {
-	httpClientMock.On("Get", mock.Anything).Return(&responseNotFoundTest, nil)
+	httpClientMock.On("SendRequest", mock.Anything).Return(&responseNotFoundTest, nil)
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestGetTest, nil)
 
@@ -96,7 +96,7 @@ func (ts *TSClient) TestValidGetNotFound() {
 }
 
 func (ts *TSClient) TestErrorGet() {
-	httpClientMock.On("Get", mock.Anything).Return(nil, fmt.Errorf("fakeError1"))
+	httpClientMock.On("SendRequest", mock.Anything).Return(nil, fmt.Errorf("fakeError1"))
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestGetTest, nil)
 
@@ -115,7 +115,7 @@ func (ts *TSClient) TestRequestErrorGet() {
 }
 
 func (ts *TSClient) TestValidPost() {
-	httpClientMock.On("Post", mock.Anything).Return(&responsePostTest, nil)
+	httpClientMock.On("SendRequest", mock.Anything).Return(&responsePostTest, nil)
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestPostTest, nil)
 	response, err := clientTest.Post(idTest)
@@ -124,7 +124,7 @@ func (ts *TSClient) TestValidPost() {
 }
 
 func (ts *TSClient) TestErrorPost() {
-	httpClientMock.On("Post", mock.Anything).Return(nil, fmt.Errorf("fakeError2"))
+	httpClientMock.On("SendRequest", mock.Anything).Return(nil, fmt.Errorf("fakeError2"))
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestPostTest, nil)
 	response, err := clientTest.Post(idTest)
@@ -141,7 +141,7 @@ func (ts *TSClient) TestRequestErrorPost() {
 }
 
 func (ts *TSClient) TestValidDelete() {
-	httpClientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(&responseDeleteTest, nil)
+	httpClientMock.On("SendRequest", mock.Anything, mock.Anything, mock.Anything).Return(&responseDeleteTest, nil)
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestDeleteTest, nil)
 	requestHandlerMock.On("SetQuery", mock.Anything, mock.Anything, mock.Anything).Return()
@@ -159,7 +159,7 @@ func (ts *TSClient) TestErrorRequestDelete() {
 }
 
 func (ts *TSClient) TestValidDeleteNotFound() {
-	httpClientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(&responseNotFoundTest, nil)
+	httpClientMock.On("SendRequest", mock.Anything, mock.Anything, mock.Anything).Return(&responseNotFoundTest, nil)
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestDeleteTest, nil)
 	requestHandlerMock.On("SetQuery", mock.Anything, mock.Anything, mock.Anything).Return()
@@ -169,7 +169,7 @@ func (ts *TSClient) TestValidDeleteNotFound() {
 }
 
 func (ts *TSClient) TestInvalidDelete() {
-	httpClientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fakeErrorDelete"))
+	httpClientMock.On("SendRequest", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fakeErrorDelete"))
 	requestHandlerMock.On("Request", mock.Anything, mock.Anything, mock.Anything,
 		mock.Anything).Return(&requestDeleteTest, nil)
 	requestHandlerMock.On("SetQuery", mock.Anything, mock.Anything, mock.Anything).Return()

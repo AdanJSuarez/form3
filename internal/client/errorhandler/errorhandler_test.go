@@ -86,18 +86,21 @@ func (ts *TSStatusHandler) TestNextInitialized() {
 // }
 
 func (ts *TSStatusHandler) TestHandleErrorUncovered() {
-	err := statusHandlerTest.StatusError(responseOK)
+	response, err := statusHandlerTest.StatusError(responseOK)
 	ts.ErrorContains(err, "status code 200:")
 	ts.ErrorContains(err, "uncovered status code for this request")
+	ts.Equal("", response)
 }
 
 func (ts *TSStatusHandler) TestHandleError() {
-	err := statusHandlerTest.StatusError(responseErrorInternalServerError)
+	response, err := statusHandlerTest.StatusError(responseErrorInternalServerError)
 	ts.ErrorContains(err, "status code 500:")
 	ts.ErrorContains(err, "an internal error occurs or the request times out")
+	ts.Nil(response)
 }
 
 func (ts *TSStatusHandler) TestHandleErrorNilResponse() {
-	err := statusHandlerTest.StatusError(nil)
+	response, err := statusHandlerTest.StatusError(nil)
 	ts.ErrorContains(err, nilResponseError)
+	ts.Nil(response)
 }

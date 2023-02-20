@@ -36,13 +36,13 @@ func (c *Client) Get(value string) (*http.Response, error) {
 		return nil, err
 	}
 
-	response, err := c.httpClient.Get(request)
+	response, err := c.httpClient.SendRequest(request)
 	if err != nil {
-		return c.errorHandler.Error(request, err)
+		return nil, err
 	}
 
 	if !c.statusOK(response) {
-		return c.errorHandler.StatusError(request, response)
+		return c.errorHandler.StatusError(response)
 	}
 
 	return response, nil
@@ -54,13 +54,13 @@ func (c *Client) Post(data interface{}) (*http.Response, error) {
 		return nil, err
 	}
 
-	response, err := c.httpClient.Post(request)
+	response, err := c.httpClient.SendRequest(request)
 	if err != nil {
-		return c.errorHandler.Error(request, err)
+		return nil, err
 	}
 
 	if !c.statusCreated(response) {
-		return c.errorHandler.StatusError(request, response)
+		return c.errorHandler.StatusError(response)
 	}
 
 	return response, nil
@@ -78,13 +78,13 @@ func (c *Client) Delete(value, parameterKey, parameterValue string) (*http.Respo
 	}
 	c.requestHandler.SetQuery(request, parameterKey, parameterValue)
 
-	response, err := c.httpClient.Delete(request)
+	response, err := c.httpClient.SendRequest(request)
 	if err != nil {
-		return c.errorHandler.Error(request, err)
+		return nil, err
 	}
 
 	if !c.statusNoContent(response) {
-		return c.errorHandler.StatusError(request, response)
+		return c.errorHandler.StatusError(response)
 	}
 
 	return response, nil

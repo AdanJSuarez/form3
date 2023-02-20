@@ -3,7 +3,6 @@ package errorhandler
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/AdanJSuarez/form3/internal/client/errorhandler/handler"
 )
@@ -47,20 +46,11 @@ func NewErrorHandler() *ErrorHandler {
 // 	return response.StatusCode == http.StatusNoContent
 // }
 
-func (s *ErrorHandler) StatusError(request *http.Request, response *http.Response) (*http.Response, error) {
+func (s *ErrorHandler) StatusError(response *http.Response) (*http.Response, error) {
 	if response == nil {
 		return nil, fmt.Errorf(nilResponseError)
 	}
 	return nil, s.next.Execute(response)
-}
-
-func (s *ErrorHandler) Error(request *http.Request, err error) (*http.Response, error) {
-	//TODO: Implement HandleError
-	if os.IsTimeout(err) {
-		// Implement retry mechanism
-		return nil, fmt.Errorf("not implemented retry mechanism: %v", err)
-	}
-	return nil, err
 }
 
 func (s *ErrorHandler) chainOfResponsibilityErrors(otherHandler handler.StatusErrorHandler) handler.StatusErrorHandler {

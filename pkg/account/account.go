@@ -35,10 +35,6 @@ func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
 	}
 	defer a.closeBody(response)
 
-	// if !a.isCreated(response) {
-	// 	return emptyDataModel, a.client.HandleError(response)
-	// }
-
 	return a.decodeResponse(response)
 }
 
@@ -49,10 +45,6 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	}
 	defer a.closeBody(response)
 
-	// if !a.isFetched(response) {
-	// 	return emptyDataModel, a.client.HandleError(response)
-	// }
-
 	return a.decodeResponse(response)
 }
 
@@ -62,10 +54,6 @@ func (a *Account) Delete(accountID string, version int) error {
 		return err
 	}
 	defer a.closeBody(response)
-
-	// if !a.isDeleted(response) {
-	// 	return a.client.HandleError(response)
-	// }
 
 	return nil
 }
@@ -85,18 +73,6 @@ func (a *Account) decodeResponse(response *http.Response) (model.DataModel, erro
 	}
 	return dataModel, nil
 }
-
-// func (a *Account) isCreated(response *http.Response) bool {
-// 	return a.client.StatusCreated(response)
-// }
-
-// func (a *Account) isFetched(response *http.Response) bool {
-// 	return a.client.StatusOK(response)
-// }
-
-// func (a *Account) isDeleted(response *http.Response) bool {
-// 	return a.client.StatusNoContent(response)
-// }
 
 func (a *Account) closeBody(response *http.Response) {
 	if response != nil && response.Body != nil {
