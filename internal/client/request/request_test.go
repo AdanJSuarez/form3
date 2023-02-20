@@ -98,6 +98,11 @@ func (ts *TSRequest) TestDataToBody() {
 	ts.Equal(bodyTest, actual)
 }
 
+func (ts *TSRequest) TestDataToByteInvalid() {
+	actual := requestTest.dataToBytes(nil)
+	ts.IsType([]byte{}, actual)
+}
+
 func (ts *TSRequest) TestNowUTCFormatted() {
 	ts.Contains(requestTest.nowUTCFormated(), "GMT")
 

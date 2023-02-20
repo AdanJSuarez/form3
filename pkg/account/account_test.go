@@ -15,10 +15,12 @@ import (
 )
 
 const (
-	baseURL        = "http://fakeurl.com"
-	accountPath    = "/v1/origanisation/"
-	uuidTest       = "123e4567-e89b-12d3-a456-426614174000"
-	organizationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
+	baseURL             = "http://fakeurl.com"
+	accountPath         = "/v1/origanisation/"
+	uuidTest            = "123e4567-e89b-12d3-a456-426614174000"
+	organizationID      = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
+	statusBadRequestMsg = "status code 400: errorCode: 12345 - errorMessage: fake message"
+	statusNotFoundMsg   = "status code 404: not found"
 )
 
 var (
@@ -58,7 +60,7 @@ func TestRunTSAccount(t *testing.T) {
 func (ts *TSAccount) BeforeTest(_, _ string) {
 	accountTest = New(*baseURLTest, accountPath)
 	ts.IsType(new(Account), accountTest)
-	clientMock = new(MockClient)
+	clientMock = NewMockClient(ts.T())
 	accountTest.client = clientMock
 }
 
@@ -75,21 +77,10 @@ func (ts *TSAccount) TestCreateValidDataModel() {
 }
 
 func (ts *TSAccount) TestCreateInvalidDataModel() {
-	res := &http.Response{
-		StatusCode: 400,
-		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
-	}
-	clientMock.On("Post", mock.Anything).Return(res, nil)
+	clientMock.On("Post", mock.Anything).Return(nil, fmt.Errorf(statusBadRequestMsg))
 
 	data, err := accountTest.Create(model.DataModel{})
-	ts.ErrorContains(err, "invalid character")
-	ts.Empty(data)
-}
-
-func (ts *TSAccount) TestCreateNilResponseWithError() {
-	clientMock.On("Post", mock.Anything).Return(nil, fmt.Errorf("fakeError"))
-	data, err := accountTest.Create(dataModelRequest)
-	ts.ErrorContains(err, "fakeError")
+	ts.ErrorContains(err, "status code 400:")
 	ts.Empty(data)
 }
 
@@ -105,7 +96,7 @@ func (ts *TSAccount) TestCreateDecodeError() {
 	ts.Empty(data)
 }
 
-func (ts *TSAccount) TestFetchValidAccount() {
+func (ts *TSAccount) TestFetchValidID() {
 	res := &http.Response{
 		StatusCode: 200,
 		Body:       io.NopCloser(bytes.NewBuffer(dataModelByte)),
@@ -117,23 +108,12 @@ func (ts *TSAccount) TestFetchValidAccount() {
 	ts.Equal(dataModelResponse, data)
 }
 
-func (ts *TSAccount) TestFetchInvalidAccount() {
-	res := &http.Response{
-		StatusCode: 404,
-		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),
-	}
-	clientMock.On("Get", mock.AnythingOfType("string")).Return(res, nil)
+func (ts *TSAccount) TestFetchNotFoundID() {
+	clientMock.On("Get", mock.AnythingOfType("string")).Return(nil,
+		fmt.Errorf(statusNotFoundMsg))
 
 	data, err := accountTest.Fetch("fakeID")
-	ts.ErrorContains(err, "status code 404: fakeErrorFetch")
-	ts.Empty(data)
-}
-
-func (ts *TSAccount) TestFetchErrorReturned() {
-	clientMock.On("Get", mock.Anything).Return(nil, fmt.Errorf("fakeErrorReturnedOnFetch"))
-
-	data, err := accountTest.Fetch("fakeID")
-	ts.ErrorContains(err, "fakeErrorReturnedOnFetch")
+	ts.ErrorContains(err, "status code 404:")
 	ts.Empty(data)
 }
 
@@ -154,29 +134,24 @@ func (ts *TSAccount) TestDeleteValidAccount() {
 		StatusCode: 204,
 		Body:       nil,
 	}
-	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
+	clientMock.On("Delete", mock.Anything, mock.Anything,
+		mock.Anything).Return(res, nil)
 
 	err := accountTest.Delete("fakeID", 0)
 	ts.NoError(err)
 }
 
-func (ts *TSAccount) TestDeleteInvalidAccount() {
-	res := &http.Response{
-		StatusCode: 404,
-		Body:       nil,
-	}
-	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
+func (ts *TSAccount) TestDeleteNotFoundAccount() {
+	clientMock.On("Delete", mock.Anything, mock.Anything,
+		mock.Anything).Return(nil, fmt.Errorf(statusNotFoundMsg))
 
 	err := accountTest.Delete("fakeID", 0)
 	ts.ErrorContains(err, "status code 404:")
 }
 
 func (ts *TSAccount) TestDeleteInvalidVersion() {
-	res := &http.Response{
-		StatusCode: 404,
-		Body:       nil,
-	}
-	clientMock.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(res, nil)
+	clientMock.On("Delete", mock.Anything, mock.Anything,
+		mock.Anything).Return(nil, fmt.Errorf(statusNotFoundMsg))
 
 	err := accountTest.Delete("fakeID", 7)
 	ts.ErrorContains(err, "status code 404:")
@@ -191,7 +166,7 @@ func (ts *TSAccount) TestDecodeResponse() {
 	ts.NoError(err)
 	ts.Equal(dataModelResponse, data)
 }
-func (ts *TSAccount) TestDecodeResponseInvalid() {
+func (ts *TSAccount) TestDecodeResponseInvalidData() {
 	res := &http.Response{
 		StatusCode: 200,
 		Body:       io.NopCloser(bytes.NewBuffer([]byte("fakeReturnedBodyError"))),

@@ -38,7 +38,7 @@ func (ts *TSStatusHandler) TestHandleErrorUncovered() {
 	response, err := statusHandlerTest.StatusError(responseOK)
 	ts.ErrorContains(err, "status code 200:")
 	ts.ErrorContains(err, "uncovered status code for this request")
-	ts.Equal("", response)
+	ts.Nil(response)
 }
 
 func (ts *TSStatusHandler) TestHandleError() {

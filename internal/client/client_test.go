@@ -67,9 +67,9 @@ func TestRunSuite(t *testing.T) {
 func (ts *TSClient) BeforeTest(_, _ string) {
 	clientURLTest, _ = url.ParseRequestURI(rawBaseURLTest)
 	clientTest = New(*clientURLTest)
-	httpClientMock = new(mockHttpClient)
-	statusErrorHandlerMock = new(mockStatusErrorHandler)
-	requestHandlerMock = new(mockRequestHandler)
+	httpClientMock = newMockHttpClient(ts.T())
+	statusErrorHandlerMock = newMockStatusErrorHandler(ts.T())
+	requestHandlerMock = newMockRequestHandler(ts.T())
 	clientTest.httpClient = httpClientMock
 	clientTest.statusErrorHandler = statusErrorHandlerMock
 	clientTest.requestHandler = requestHandlerMock

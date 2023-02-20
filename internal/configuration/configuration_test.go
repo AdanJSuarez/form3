@@ -25,7 +25,7 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSConfiguration) BeforeTest(_, _ string) {
-	configurationTest = new(Configuration)
+	configurationTest = New()
 	ts.IsType(new(Configuration), configurationTest)
 }
 
@@ -62,13 +62,13 @@ func (ts *TSConfiguration) TestInvalidBaseURL3() {
 }
 
 func (ts *TSConfiguration) TestValidInitializeByEnv() {
-	_, ok := os.LookupEnv(baseURLEnvKey)
-	if !ok {
+	_, ok1 := os.LookupEnv(baseURLEnvKey)
+	if !ok1 {
 		os.Setenv(baseURLEnvKey, rawBaseURL)
 		defer os.Unsetenv(baseURLEnvKey)
 	}
-	_, ok = os.LookupEnv(accountPathEnvKey)
-	if !ok {
+	_, ok2 := os.LookupEnv(accountPathEnvKey)
+	if !ok2 {
 		os.Setenv(accountPathEnvKey, accountPath)
 		defer os.Unsetenv(accountPathEnvKey)
 	}
@@ -84,4 +84,14 @@ func (ts *TSConfiguration) TestInvalidInitializeByEnv() {
 	ts.ErrorContains(err, "failed to get BASE_URL from environment variables")
 	ts.Empty(configurationTest.baseURL)
 	ts.Empty(configurationTest.accountPath)
+}
+
+func (ts *TSConfiguration) TestInvalidInitializedByEnvAccountPath() {
+	_, ok1 := os.LookupEnv(baseURLEnvKey)
+	if !ok1 {
+		os.Setenv(baseURLEnvKey, rawBaseURL)
+		defer os.Unsetenv(baseURLEnvKey)
+	}
+	err := configurationTest.InitializeByEnv()
+	ts.Error(err)
 }

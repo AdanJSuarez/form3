@@ -82,7 +82,7 @@ func TestRunSuite(t *testing.T) {
 func (ts *TSHTTPClient) BeforeTest(_, _ string) {
 	httpClientTest = New()
 	ts.IsType(new(HTTPClient), httpClientTest)
-	mockHTTPClient = new(mockHttpClient)
+	mockHTTPClient = newMockHttpClient(ts.T())
 	httpClientTest.httpClient = mockHTTPClient
 }
 

@@ -48,8 +48,8 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSForm3) BeforeTest(_, _ string) {
-	mockConfiguration = new(MockConfiguration)
-	mockAccount = new(MockAccount)
+	mockConfiguration = NewMockConfiguration(ts.T())
+	mockAccount = NewMockAccount(ts.T())
 	form3Test = New()
 	ts.IsType(new(Form3), form3Test)
 	form3Test.configuration = mockConfiguration
@@ -97,22 +97,19 @@ func (ts *TSForm3) TestInvalidAccountObject() {
 }
 
 func (ts *TSForm3) TestInvalidConfigurationByEnv() {
+	mockConfiguration = new(MockConfiguration)
 	mockConfiguration.On("InitializeByEnv").Return(fmt.Errorf("not implemented"))
-	mockConfiguration.On("AccountPath", mock.Anything).Return(accountPath)
-	mockConfiguration.On("BaseURL", mock.Anything).Return(baseURLTest)
-	form3Test = New()
+	mockConfiguration.On("AccountPath").Return(accountPath)
+	mockConfiguration.On("BaseURL").Return(baseURLTest)
 	form3Test.configuration = mockConfiguration
-
 	err := form3Test.ConfigurationByEnv()
 	ts.NotNil(err)
 }
 
 func (ts *TSForm3) TestValidConfigurationByEnv() {
 	mockConfiguration.On("InitializeByEnv").Return(nil)
-	mockConfiguration.On("AccountPath", mock.Anything).Return(accountPath)
-	mockConfiguration.On("BaseURL", mock.Anything).Return(baseURLTest)
-	form3Test = New()
-	form3Test.configuration = mockConfiguration
+	mockConfiguration.On("AccountPath").Return(accountPath)
+	mockConfiguration.On("BaseURL").Return(baseURLTest)
 
 	err := form3Test.ConfigurationByEnv()
 	ts.Nil(err)

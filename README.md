@@ -59,7 +59,7 @@ To set those parameters I implemented two different ways. One is setting them as
 
 ## Retry mechanism
 
-The API documentation encourage us to implement a [retry mechanism](https://www.api-docs.form3.tech/api/schemes/sepa-instant-credit-transfer/introduction/timeouts/retry-strategy) on failure. I implemented a basic Retry and unit-tested it.
+The API documentation encourage us to implement a [retry mechanism](https://www.api-docs.form3.tech/api/schemes/sepa-instant-credit-transfer/introduction/timeouts/retry-strategy) on failure. I implemented the exponential back-off retry algorithm set in pseudo-code.
 
 ## Headers
 

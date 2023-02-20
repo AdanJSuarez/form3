@@ -33,9 +33,15 @@ integration:
 	@echo "==> Running Integration Test 🎵 <=="
 	go test -v ./integration
 
-.PHONE: clean
+.PHONY: clean
 clean:
 	@echo "==> Cleaning ..."
 	docker-compose down
 	docker image rm form3-test
 	docker builder prune
+
+.PHONY: cover
+cover:
+	@echo "==> Visual coverage for $(FOLDER)"
+	go test $(FOLDER) -coverprofile=coverage/lastCoverage.out
+	go tool cover -html=coverage/lastCoverage.out
