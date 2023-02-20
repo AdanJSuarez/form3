@@ -28,21 +28,50 @@ var (
 		Body:       io.NopCloser(bytes.NewBuffer(dataBytesMarshal)),
 	}
 	responseTooManyRequestTest = http.Response{
-		Status:     "429 Too many request",
-		StatusCode: 429,
+		Status:     "429 Too Many Request",
+		StatusCode: http.StatusTooManyRequests,
 		Body:       io.NopCloser(bytes.NewBuffer(dataBytesMarshal)),
 	}
 	responseNotFoundTest = http.Response{
 		Status:     "404 Not Found",
-		StatusCode: 404,
+		StatusCode: http.StatusNotFound,
 		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
 	}
-	responseDeleteTest = http.Response{
-		Status:     "204 Delete",
-		StatusCode: 204,
+	responseInternalServerErrorTest = http.Response{
+		Status:     "500 Internal Server Error",
+		StatusCode: http.StatusInternalServerError,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
+	}
+	responseBadGatewayErrorTest = http.Response{
+		Status:     "502 Bad Gateway",
+		StatusCode: http.StatusBadGateway,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
+	}
+	responseServiceUnavailableErrorTest = http.Response{
+		Status:     "503 Service Unavailable",
+		StatusCode: http.StatusServiceUnavailable,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
+	}
+	responseGatewayTimeoutErrorTest = http.Response{
+		Status:     "504 Gateway Timeout",
+		StatusCode: http.StatusGatewayTimeout,
 		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
 	}
 )
+
+type timeoutError struct {
+	error
+}
+
+func (e timeoutError) Timeout() bool {
+	return true
+}
+func (e timeoutError) Temporary() bool {
+	return true
+}
+func (e timeoutError) Error() string {
+	return "timeout error super fake"
+}
 
 type TSHTTPClient struct{ suite.Suite }
 
@@ -70,7 +99,13 @@ func (ts *TSHTTPClient) TestReturnErr() {
 	ts.ErrorContains(err, "fakeError")
 	ts.Nil(response)
 }
-
+func (ts *TSHTTPClient) TestTimeoutError() {
+	errTest := timeoutError{}
+	mockHTTPClient.On("Do", mock.Anything).Return(nil, errTest)
+	response, err := httpClientTest.SendRequest(requestTest)
+	ts.True(os.IsTimeout(err))
+	ts.Nil(response)
+}
 func (ts *TSHTTPClient) TestNilRequest() {
 	response, err := httpClientTest.SendRequest(nil)
 	ts.ErrorContains(err, "nil request")
@@ -83,194 +118,47 @@ func (ts *TSHTTPClient) TestResponseNotFound() {
 	ts.NoError(err)
 	ts.Equal(404, response.StatusCode)
 }
-func (ts *TSHTTPClient) TestTimeoutError() {
-	errTest := testError{}
-	mockHTTPClient.On("Do", mock.Anything).Return(nil, errTest)
-	response, err := httpClientTest.SendRequest(requestTest)
-	ts.True(os.IsTimeout(err))
-	ts.Nil(response)
-}
 
 func (ts *TSHTTPClient) TestTooManyRequest() {
+	mockHTTPClient = new(mockHttpClient)
+	httpClientTest.httpClient = mockHTTPClient
 	mockHTTPClient.On("Do", mock.Anything).Return(&responseTooManyRequestTest, nil)
 	response, err := httpClientTest.SendRequest(requestTest)
 	ts.NoError(err)
 	ts.Equal(&responseTooManyRequestTest, response)
-
 }
 
-type testError struct {
-	error
+func (ts *TSHTTPClient) TestInternalServerError() {
+	mockHTTPClient = new(mockHttpClient)
+	httpClientTest.httpClient = mockHTTPClient
+	mockHTTPClient.On("Do", mock.Anything).Return(&responseInternalServerErrorTest, nil)
+	response, err := httpClientTest.SendRequest(requestTest)
+	ts.NoError(err)
+	ts.Equal(&responseInternalServerErrorTest, response)
 }
 
-func (e testError) Timeout() bool {
-	return true
+func (ts *TSHTTPClient) TestBadGatewayError() {
+	mockHTTPClient = new(mockHttpClient)
+	httpClientTest.httpClient = mockHTTPClient
+	mockHTTPClient.On("Do", mock.Anything).Return(&responseBadGatewayErrorTest, nil)
+	response, err := httpClientTest.SendRequest(requestTest)
+	ts.NoError(err)
+	ts.Equal(&responseBadGatewayErrorTest, response)
+}
+func (ts *TSHTTPClient) TestServiceUnavailableError() {
+	mockHTTPClient = new(mockHttpClient)
+	httpClientTest.httpClient = mockHTTPClient
+	mockHTTPClient.On("Do", mock.Anything).Return(&responseServiceUnavailableErrorTest, nil)
+	response, err := httpClientTest.SendRequest(requestTest)
+	ts.NoError(err)
+	ts.Equal(&responseServiceUnavailableErrorTest, response)
 }
 
-func (e testError) Temporary() bool {
-	return true
+func (ts *TSHTTPClient) TestGatewayTimeoutError() {
+	mockHTTPClient = new(mockHttpClient)
+	httpClientTest.httpClient = mockHTTPClient
+	mockHTTPClient.On("Do", mock.Anything).Return(&responseGatewayTimeoutErrorTest, nil)
+	response, err := httpClientTest.SendRequest(requestTest)
+	ts.NoError(err)
+	ts.Equal(&responseGatewayTimeoutErrorTest, response)
 }
-
-func (e testError) Error() string {
-	return "timeout error super fake"
-}
-
-// func (ts *TSHTTPClient) TestValidPost() {
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responsePostTest, nil)
-// 	response, err := httpClientTest.SendRequest(requestTest)
-// 	ts.NoError(err)
-// 	ts.Equal(&responsePostTest, response)
-// }
-
-// func (ts *TSHTTPClient) TestErrorPost() {
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, fmt.Errorf("fakeError2"))
-// 	response, err := httpClientTest.SendRequest(requestTest)
-// 	ts.ErrorContains(err, "fakeError2")
-// 	ts.Nil(response)
-// }
-
-// func (ts *TSHTTPClient) TestNilRequestPost() {
-// 	response, err := httpClientTest.SendRequest(nil)
-// 	ts.ErrorContains(err, "nil request")
-// 	ts.Nil(response)
-// }
-
-// func (ts *TSHTTPClient) TestValidDelete() {
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseDeleteTest, nil)
-// 	response, err := httpClientTest.SendRequest(requestTest)
-// 	ts.NoError(err)
-// 	ts.Equal(&responseDeleteTest, response)
-// }
-
-// func (ts *TSHTTPClient) TestErrorDelete() {
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, fmt.Errorf("fakeError3"))
-// 	response, err := httpClientTest.SendRequest(requestTest)
-// 	ts.ErrorContains(err, "fakeError3")
-// 	ts.Nil(response)
-// }
-
-// func (ts *TSHTTPClient) TestNilRequestDelete() {
-// 	response, err := httpClientTest.SendRequest(nil)
-// 	ts.ErrorContains(err, "nil request")
-// 	ts.Nil(response)
-// }
-
-// func (ts *TSHTTPClient) TestNotFoundDelete() {
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseNotFoundTest, nil)
-// 	response, err := httpClientTest.SendRequest(requestTest)
-// 	ts.NoError(err)
-// 	ts.Equal(404, response.StatusCode)
-// }
-
-// func (ts *TSHTTPClient) TestValidGetWithData() {
-// 	response, err := httpClientTest.Get(idTest)
-// 	ts.NoError(err)
-// 	ts.Equal(&responseGetTest, response)
-// }
-
-// func (ts *TSHTTPClient) TestValidGetWithEmptyData() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseNotFoundTest, nil)
-// 	httpClientTest.httpClient = mockHTTPClient
-
-// 	response, err := httpClientTest.Get("")
-// 	ts.NoError(err)
-// 	ts.Equal(&responseNotFoundTest, response)
-// }
-
-// func (ts *TSHTTPClient) TestErrorGetWithData() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, fmt.Errorf("fake http error"))
-// 	httpClientTest.httpClient = mockHTTPClient
-
-// 	response, err := httpClientTest.Get(idTest)
-// 	ts.Error(err)
-// 	ts.Nil(response)
-// }
-
-// func (ts *TSHTTPClient) TestValidPost() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responsePostTest, nil)
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	response, err := httpClientTest.Post(reqBodyTest)
-// 	ts.NoError(err)
-// 	ts.NotNil(response)
-// 	ts.Equal(201, response.StatusCode)
-// }
-
-// func (ts *TSHTTPClient) TestInvalidPost() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, fmt.Errorf("fake http error"))
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	response, err := httpClientTest.Post(reqBodyTest)
-// 	ts.Error(err)
-// 	ts.Nil(response)
-// }
-
-// func (ts *TSHTTPClient) TestValidDelete() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseDelete, nil)
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	response, err := httpClientTest.Delete("fakeValue", "version", "1")
-// 	ts.NoError(err)
-// 	ts.NotNil(response)
-// }
-
-// func (ts *TSHTTPClient) TestValidDeleteEmptyValue() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseDelete, nil)
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	response, err := httpClientTest.Delete("", "", "")
-// 	ts.NoError(err)
-// 	ts.NotNil(response)
-// }
-
-// func (ts *TSHTTPClient) TestValidDeleteNotFound() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(&responseNotFoundTest, nil)
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	response, err := httpClientTest.Delete("fakeValue", "version", "1")
-// 	ts.NoError(err)
-// 	ts.Equal(&responseNotFoundTest, response)
-// 	ts.Equal(404, response.StatusCode)
-// }
-
-// func (ts *TSHTTPClient) TestInvalidDelete() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, fmt.Errorf("fake error"))
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	response, err := httpClientTest.Delete("fakeValue", "version", "1")
-// 	ts.Error(err)
-// 	ts.Nil(response)
-// }
-
-// func (ts *TSHTTPClient) TestEmptyResponseAndRequestError() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, fmt.Errorf("fake error"))
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	request, err := httpClientTest.request(POST, httpClientTest.clientURL.String(), reqBodyTest)
-// 	ts.NoError(err)
-// 	response, err := httpClientTest.doRequest(request)
-// 	ts.ErrorContains(err, "fake error")
-// 	ts.NotNil(response)
-// }
-
-// func (ts *TSHTTPClient) TestEmptyResponseAndNilResponseError() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, nil)
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	request, err := httpClientTest.request(POST, httpClientTest.clientURL.String(), reqBodyTest)
-// 	ts.NoError(err)
-// 	response, err := httpClientTest.doRequest(request)
-// 	ts.ErrorContains(err, "nil response")
-// 	ts.NotNil(response)
-// }
-
-// func (ts *TSHTTPClient) TestEmptyResponseAndNilRequest() {
-// 	mockHTTPClient := new(mockHttpClient)
-// 	mockHTTPClient.On("Do", mock.AnythingOfType("*http.Request")).Return(nil, nil)
-// 	httpClientTest.httpClient = mockHTTPClient
-// 	response, err := httpClientTest.doRequest(nil)
-// 	ts.ErrorContains(err, "nil response")
-// 	ts.NotNil(response)
-// }

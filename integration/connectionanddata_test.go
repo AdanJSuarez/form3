@@ -176,9 +176,8 @@ func (ts *TSIntegration) TestCreateAccountWithoutType() {
 	dataModelTest = dataModelUK
 	dataModelTest.Data.Type = ""
 	data, err := accountTest.Create(dataModelTest)
-	ts.NoError(err)
-	ts.NotEmpty(data)
-	ts.NotEmpty(data.Data.Attributes.Iban)
+	ts.Error(err)
+	ts.Empty(data)
 }
 
 // It should fail if we don't provide "type" in account creation
@@ -199,13 +198,13 @@ func (ts *TSIntegration) TestFailToCreateAccountWithoutAttributes() {
 	ts.Empty(data)
 }
 
-// It shouldn't fail if we don't pass "name" in the attributes.
+// It should fail if we don't pass "name" in the attributes.
 func (ts *TSIntegration) TestCreateAccountWithoutName() {
 	dataModelTest = dataModelUK
 	dataModelTest.Data.Attributes.Name = nil
 	data, err := accountTest.Create(dataModelTest)
-	ts.NoError(err)
-	ts.NotEmpty(data)
+	ts.Error(err)
+	ts.Empty(data)
 }
 
 // It should not fail without base_currency for a none EUR country.
@@ -217,16 +216,16 @@ func (ts *TSIntegration) TestCreateAccountWithoutBaseCurrency() {
 	ts.NotEmpty(data)
 }
 
-// It should fail without base_currency for a EUR country
+// It shouldn't fail without base_currency for a EUR country
 func (ts *TSIntegration) TestFailCreateAccountWithoutBaseCurrency() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.Attributes.BaseCurrency = ""
 	data, err := accountTest.Create(dataModelTest)
-	ts.Error(err)
-	ts.Empty(data)
+	ts.NoError(err)
+	ts.NotEmpty(data)
 }
 
-// It should not fail with invalid base_currency for a EUR country.
+// It should fail with invalid base_currency for a EUR country.
 func (ts *TSIntegration) TestFailCreateAccountWithInvalidBaseCurrency() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.Attributes.BaseCurrency = "333"

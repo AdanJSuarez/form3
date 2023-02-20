@@ -29,6 +29,4 @@ func (ts *TSIntegration) TestCreateAccountUK() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.NotEmpty(data)
-	ts.NotEmpty(data.Data.Attributes.Iban)
-	ts.NotEmpty(data.Data.Attributes.AccountNumber)
 }

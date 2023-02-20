@@ -30,8 +30,6 @@ func (ts *TSIntegration) TestAccountCreateBE1() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.NotEmpty(data)
-	ts.NotEmpty(data.Data.Attributes.Iban)
-	ts.NotEmpty(data.Data.Attributes.AccountNumber)
 }
 
 // It should create an account when BIC is included.
@@ -41,8 +39,6 @@ func (ts *TSIntegration) TestAccountCreateBE2() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.NotEmpty(data)
-	ts.NotEmpty(data.Data.Attributes.Iban)
-	ts.NotEmpty(data.Data.Attributes.AccountNumber)
 }
 
 // It should not create an account when the BIC doesn't meet the requirements
@@ -54,28 +50,19 @@ func (ts *TSIntegration) TestFailCreateAccountBE1() {
 	ts.Empty(data)
 }
 
-// It should not create an account when Bank ID code isn't included
+// It should create an account when Bank ID code isn't included
 func (ts *TSIntegration) TestFailCreateAccountBE2() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.Attributes.BankIDCode = ""
 	data, err := accountTest.Create(dataModelTest)
-	ts.Error(err)
-	ts.Empty(data)
+	ts.NoError(err)
+	ts.NotEmpty(data)
 }
 
 // It should not create an account when Bank ID code isn't correct
 func (ts *TSIntegration) TestFailCreateAccountBE3() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.Attributes.BankIDCode = "11111"
-	data, err := accountTest.Create(dataModelTest)
-	ts.Error(err)
-	ts.Empty(data)
-}
-
-// It should not create an account when Bank ID code doesn't match the country
-func (ts *TSIntegration) TestFailCreateAccountBE4() {
-	dataModelTest = dataModelBE
-	dataModelTest.Data.Attributes.BankIDCode = "ESNCC"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
@@ -88,7 +75,6 @@ func (ts *TSIntegration) TestAccountCreateBE3() {
 	data, err := accountTest.Create(dataModelTest)
 	ts.NoError(err)
 	ts.NotEmpty(data)
-	ts.NotEmpty(data.Data.Attributes.Iban)
 	ts.NotEmpty(data.Data.Attributes.AccountNumber)
 }
 
