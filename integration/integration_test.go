@@ -133,7 +133,7 @@ func (ts *TSIntegration) TestInvalidConfigurationByValueWrongPath() {
 	}
 	accountTest = f3Test.Account()
 	data, err := accountTest.Fetch("xxxxxx")
-	ts.ErrorContains(err, "status code 404: not found: trying to access a non-existent endpoint or resource")
+	ts.ErrorContains(err, "status code 404: not found: trying to access a non-existent\n\tendpoint or resource")
 	ts.Empty(data)
 }
 
