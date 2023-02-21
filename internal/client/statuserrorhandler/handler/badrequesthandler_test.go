@@ -11,8 +11,11 @@ import (
 
 var (
 	badRequest StatusErrorHandler
-	data1      = `{"error_message": "Message parsing failed: Unexpected character (';' (code 34)): was expecting comma to separate Object entries ",
-		"error_code": "d0a17902-63ed-4cb6-a8e8-fac5ca31b0b7"}`
+	data1      = `
+		{
+			"error_message": "Message parsing failed: Unexpected character (';' (code 34)): was expecting comma to separate Object entries ",
+			"error_code": "d0a17902-63ed-4cb6-a8e8-fac5ca31b0b7"
+		}`
 	badRequestResponse = &http.Response{
 		StatusCode: http.StatusBadRequest,
 		Body:       io.NopCloser(bytes.NewBuffer([]byte(data1))),
