@@ -9,15 +9,15 @@ import (
 )
 
 const (
-	defaultTimeout = 10 * time.Second
-	maxRetries     = 3
-	// maxJitter set small to avoid test timeout during retry. Set bigger for production
-	maxJitter       = 100
-	exponentialBase = 1.5
-	// periodMultiplier set small to avoid test timeout during retry. Set bigger for production
-	periodMultiplier = 100 * time.Millisecond
-	nilRequest       = "nil request"
+	defaultTimeout           = 10 * time.Second
+	exponentialBase          = 1.5
+	maxRetries       float64 = 3
+	maxJitter                = 10
+	periodMultiplier float64 = 1
+	nilRequest               = "nil request"
 )
+
+var timeMultiplier = time.Second
 
 type HTTPClient struct {
 	httpClient httpClient
@@ -49,7 +49,6 @@ func (c *HTTPClient) SendRequest(request *http.Request) (*http.Response, error) 
 		}
 		retries++
 	}
-
 	return response, err
 }
 
@@ -59,8 +58,8 @@ func (c *HTTPClient) needRetry(response *http.Response) bool {
 
 func (c *HTTPClient) exponentialDelay(retries float64) {
 	rand.Seed(time.Now().UnixNano())
-	period := time.Duration(math.Pow(exponentialBase, retries)) * periodMultiplier
-	jitter := time.Duration(rand.Intn(maxJitter)) * time.Millisecond
+	period := time.Duration(math.Pow(exponentialBase, retries)*periodMultiplier) * timeMultiplier
+	jitter := time.Duration(rand.Intn(maxJitter)) * timeMultiplier
 	time.Sleep(period + jitter)
 }
 

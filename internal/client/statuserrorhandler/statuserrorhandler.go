@@ -31,28 +31,16 @@ func (s *StatusErrorHandler) StatusError(response *http.Response) (*http.Respons
 }
 
 func (s *StatusErrorHandler) chainOfResponsibilityErrors(otherHandler handler.StatusErrorHandler) handler.StatusErrorHandler {
-	// gatewayTimeout := handler.NewGatewayTimeoutHandler()
-	// serviceUnavailable := handler.NewServiceUnavailableHandler()
-	// badGateway := handler.NewBadGatewayHandler()
-	// serverError := handler.NewServerErrorHandler()
-
 	tooManyRequests := handler.NewTooManyRequestsHandler()
 	conflict := handler.NewConflictHandler()
-	// notAcceptable := handler.NewNotAcceptableHandler()
 	methodNotAllowed := handler.NewMethodNotAllowedHandler()
 	notFound := handler.NewNotFoundHandler()
 	forbidden := handler.NewForbiddenHandler()
 	unauthorized := handler.NewErrorStatusWithoutMessageHandler()
 	badRequest := handler.NewBadRequestHandler()
 
-	// gatewayTimeout.SetNext(otherHandler)
-	// serviceUnavailable.SetNext(gatewayTimeout)
-	// badGateway.SetNext(serviceUnavailable)
-	// serverError.SetNext(badGateway)
-
 	tooManyRequests.SetNext(otherHandler)
 	conflict.SetNext(tooManyRequests)
-	// notAcceptable.SetNext(conflict)
 	methodNotAllowed.SetNext(conflict)
 	notFound.SetNext(methodNotAllowed)
 	forbidden.SetNext(notFound)

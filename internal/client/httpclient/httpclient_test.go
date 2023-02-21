@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -80,6 +81,7 @@ func TestRunSuite(t *testing.T) {
 }
 
 func (ts *TSHTTPClient) BeforeTest(_, _ string) {
+	timeMultiplier = time.Millisecond
 	httpClientTest = New()
 	ts.IsType(new(HTTPClient), httpClientTest)
 	mockHTTPClient = newMockHttpClient(ts.T())

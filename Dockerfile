@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM golang:1.19
 
-WORKDIR /test
+WORKDIR /app
 
 COPY . .
 
@@ -16,4 +16,4 @@ fi
 # RUN go test ./pkg/... -cover && go test ./internal/... -cover
 
 # Run integration tests
-CMD [ "go" , "test", "-v", "./integration/..." ]
+CMD [ "go" , "test", "-v", "./integration"]
