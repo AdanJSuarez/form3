@@ -6,12 +6,17 @@ import (
 )
 
 const (
-	unauthorizedMessage       = "invalid request signature or access token"
-	notAcceptableMessage      = "trying to access content with an incorrect content type specific in the request header"
-	serverErrorMessage        = "an internal error occurs or the request times out. This is safe to retry after waiting a short amount of time"
-	badGatewayMessage         = "there is a temporary internal networking problem. This is safe to retry after waiting a short amount of time"
-	serviceUnavailableMessage = "service is temporarily overloaded. This is safe to retry after waiting a short amount of time"
-	gatewayTimeoutMessage     = "there is a temporary internal networking problem. This is safe to retry after waiting a short amount of time"
+	unauthorizedMessage  = "invalid request signature or access token"
+	notAcceptableMessage = `trying to access content with an incorrect
+		content type specific in the request header`
+	serverErrorMessage = `an internal error occurs or the request
+		times out. This is safe to retry after waiting a short amount of time`
+	badGatewayMessage = `there is a temporary internal networking problem.
+		This is safe to retry after waiting a short amount of time`
+	serviceUnavailableMessage = `service is temporarily overloaded.
+		This is safe to retry after waiting a short amount of time`
+	gatewayTimeoutMessage = `there is a temporary internal networking
+		problem. This is safe to retry after waiting a short amount of time`
 )
 
 type errorStatusWithoutMessageHandler struct {

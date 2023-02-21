@@ -76,7 +76,7 @@ func (r *RequestHandler) dataToBody() io.ReadCloser {
 
 func (r *RequestHandler) addRequiredHeader(host string, request *http.Request) {
 	request.Header.Add(HOST_KEY, host)
-	request.Header.Add(DATE_KEY, r.nowUTCFormated())
+	request.Header.Add(DATE_KEY, r.nowUTCFormatted())
 	request.Header.Add(ACCEPT_KEY, CONTENT_TYPE_VALUE)
 	request.Header.Add(ACCEPT_ENCODING_KEY, ACCEPT_ENCODING_VALUE)
 }
@@ -95,6 +95,6 @@ func (r *RequestHandler) digestFormatted() string {
 	return desire
 }
 
-func (r *RequestHandler) nowUTCFormated() string {
+func (r *RequestHandler) nowUTCFormatted() string {
 	return time.Now().UTC().Format(http.TimeFormat)
 }

@@ -104,6 +104,6 @@ func (ts *TSRequest) TestDataToByteInvalid() {
 }
 
 func (ts *TSRequest) TestNowUTCFormatted() {
-	ts.Contains(requestTest.nowUTCFormated(), "GMT")
+	ts.Contains(requestTest.nowUTCFormatted(), "GMT")
 
 }

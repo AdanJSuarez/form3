@@ -5,7 +5,9 @@ import (
 	"net/http"
 )
 
-const notFoundMessage = "not found: trying to access a non-existent endpoint or resource. Returned in some APIs when a queried parameter cannot be found"
+const notFoundMessage = `not found: trying to access a non-existent
+	endpoint or resource. Returned in some APIs when a queried
+	parameter cannot be found`
 
 type notFoundHandler struct {
 	next StatusErrorHandler

@@ -49,7 +49,8 @@ func (c *Client) Get(value string) (*http.Response, error) {
 }
 
 func (c *Client) Post(data interface{}) (*http.Response, error) {
-	request, err := c.requestHandler.Request(data, http.MethodPost, c.clientURL.String(), c.clientURL.Host)
+	request, err := c.requestHandler.Request(data, http.MethodPost, c.clientURL.String(),
+		c.clientURL.Host)
 	if err != nil {
 		return nil, err
 	}
@@ -110,10 +111,6 @@ func (c *Client) statusNoContent(response *http.Response) bool {
 	}
 	return response.StatusCode == http.StatusNoContent
 }
-
-// func (c *Client) HandleError(response *http.Response) error {
-// 	return c.errorHandler.HandleStatusError(response)
-// }
 
 func (c *Client) joinValuesToURL(values ...string) (string, error) {
 	url, err := url.JoinPath(c.clientURL.String(), values...)

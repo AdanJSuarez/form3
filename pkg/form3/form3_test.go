@@ -43,7 +43,7 @@ var (
 
 type TSForm3 struct{ suite.Suite }
 
-func TestRunSuite(t *testing.T) {
+func TestRunForm3Suite(t *testing.T) {
 	suite.Run(t, new(TSForm3))
 }
 

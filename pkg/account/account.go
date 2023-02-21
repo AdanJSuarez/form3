@@ -33,6 +33,7 @@ func (a *Account) Create(data model.DataModel) (model.DataModel, error) {
 	if err != nil {
 		return emptyDataModel, err
 	}
+
 	defer a.closeBody(response)
 
 	return a.decodeResponse(response)
@@ -43,6 +44,7 @@ func (a *Account) Fetch(accountID string) (model.DataModel, error) {
 	if err != nil {
 		return emptyDataModel, err
 	}
+
 	defer a.closeBody(response)
 
 	return a.decodeResponse(response)
@@ -53,6 +55,7 @@ func (a *Account) Delete(accountID string, version int) error {
 	if err != nil {
 		return err
 	}
+
 	defer a.closeBody(response)
 
 	return nil
@@ -68,9 +71,11 @@ func (a *Account) decodeResponse(response *http.Response) (model.DataModel, erro
 	if response == nil {
 		return dataModel, fmt.Errorf(httpResponseNilError)
 	}
+
 	if err := json.NewDecoder(response.Body).Decode(&dataModel); err != nil {
 		return dataModel, err
 	}
+
 	return dataModel, nil
 }
 

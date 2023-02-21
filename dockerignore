@@ -1,0 +1,16 @@
+# VSCode
+.vscode
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Output of the go coverage tool.
+coverage
+*.out
+
+# Readme
+README.md

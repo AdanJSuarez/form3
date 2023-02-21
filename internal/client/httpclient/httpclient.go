@@ -38,7 +38,7 @@ func (c *HTTPClient) SendRequest(request *http.Request) (*http.Response, error) 
 	var err error
 
 	for retries <= maxRetries {
-		if retries > 0 {
+		if c.hasRetried(retries) {
 			c.exponentialDelay(retries)
 		}
 
@@ -50,6 +50,10 @@ func (c *HTTPClient) SendRequest(request *http.Request) (*http.Response, error) 
 		retries++
 	}
 	return response, err
+}
+
+func (c *HTTPClient) hasRetried(retries float64) bool {
+	return retries > 0
 }
 
 func (c *HTTPClient) needRetry(response *http.Response) bool {

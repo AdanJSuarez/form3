@@ -44,7 +44,7 @@ func (ts *TSStatusHandler) TestHandleErrorUncovered() {
 func (ts *TSStatusHandler) TestHandleError() {
 	response, err := statusHandlerTest.StatusError(responseErrorInternalServerError)
 	ts.ErrorContains(err, "status code 500:")
-	ts.ErrorContains(err, "an internal error occurs or the request times out")
+	ts.ErrorContains(err, "an internal error occurs or the request\n\t\ttimes out")
 	ts.Nil(response)
 }
 

@@ -5,7 +5,8 @@ import (
 	"net/http"
 )
 
-const methodNotAllowedMessage = "trying to access an endpoint that exists using a method that is not supported by the target resource"
+const methodNotAllowedMessage = `trying to access an endpoint that exists using
+	a method that is not supported by the target resource`
 
 type methodNotAllowedHandler struct {
 	next StatusErrorHandler

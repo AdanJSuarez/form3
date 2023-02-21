@@ -30,7 +30,8 @@ func (s *StatusErrorHandler) StatusError(response *http.Response) (*http.Respons
 	return nil, s.next.Execute(response)
 }
 
-func (s *StatusErrorHandler) chainOfResponsibilityErrors(otherHandler handler.StatusErrorHandler) handler.StatusErrorHandler {
+func (s *StatusErrorHandler) chainOfResponsibilityErrors(
+	otherHandler handler.StatusErrorHandler) handler.StatusErrorHandler {
 	tooManyRequests := handler.NewTooManyRequestsHandler()
 	conflict := handler.NewConflictHandler()
 	methodNotAllowed := handler.NewMethodNotAllowedHandler()

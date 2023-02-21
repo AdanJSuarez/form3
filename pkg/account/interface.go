@@ -7,7 +7,7 @@ import (
 //go:generate mockery --inpackage --name=Client
 
 type Client interface {
-	Get(accoutID string) (*http.Response, error)
+	Get(accountID string) (*http.Response, error)
 	Post(data interface{}) (*http.Response, error)
 	Delete(accountID, parameterKey, parameterValue string) (*http.Response, error)
 }

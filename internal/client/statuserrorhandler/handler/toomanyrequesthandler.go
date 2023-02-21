@@ -5,9 +5,10 @@ import (
 	"net/http"
 )
 
-const tooManyRequestsMessage = `the rate limit for requests per second has been exceeded.
-Also used in the Form3 Multi-Cloud stack when an attempted change involves a resource whose state is still being synchronised across the stack.
-Wait, then retry later`
+const tooManyRequestsMessage = `the rate limit for requests per second
+	has been exceeded. Also used in the Form3 Multi-Cloud stack when an
+	attempted change involves a resource whose state is still being
+	synchronized across the stack. Wait, then retry later`
 
 type tooManyRequestsHandler struct {
 	next StatusErrorHandler

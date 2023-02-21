@@ -60,7 +60,7 @@ var (
 
 type TSClient struct{ suite.Suite }
 
-func TestRunSuite(t *testing.T) {
+func TestRunClientSuite(t *testing.T) {
 	suite.Run(t, new(TSClient))
 }
 
