@@ -12,12 +12,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-// TODO: Change baseAPIURL for accountapi
 const (
 	healthCheckNumOfTries = 10
 	healthCheckInterval   = 5 * time.Second
 	organizationID        = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	baseAPIURL            = "http://localhost:8080" //"http://accountapi:8080"
+	baseAPIURL            = "http://accountapi:8080"
 	accountPath           = "/v1/organisation/accounts"
 	fakeIBAN              = "ES2317002001280000001200527600"
 )
@@ -94,11 +93,10 @@ func (ts *TSIntegration) getHealthCheck() bool {
 	return true
 }
 
-// TODO: Change ConfigurationByValue for ConfigurationByEnv
 func (ts *TSIntegration) BeforeTest(_, _ string) {
 	dataModelTest = dataModelUK
 	f3Test = form3.New()
-	if err := f3Test.ConfigurationByValue(baseAPIURL, accountPath); err != nil { //if err := f3Test.ConfigurationByEnv(); err != nil {
+	if err := f3Test.ConfigurationByEnv(); err != nil {
 		log.Printf("Error in Configuration: %v", err)
 		return
 	}
@@ -139,7 +137,7 @@ func (ts *TSIntegration) TestInvalidConfigurationByValueWrongPath() {
 	ts.Empty(data)
 }
 
-// It should not create an account with empth "DataModel".
+// It should not create an account with empty "DataModel".
 func (ts *TSIntegration) TestFailToCreateAccountEmptyData() {
 	data, err := accountTest.Create(model.DataModel{})
 	ts.ErrorContains(err, "status code 400:")
