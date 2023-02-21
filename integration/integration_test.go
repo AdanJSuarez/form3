@@ -139,9 +139,16 @@ func (ts *TSIntegration) TestInvalidConfigurationByValueWrongPath() {
 	ts.Empty(data)
 }
 
-// It should not create an account with incomplete info.
+// It should not create an account with empth "DataModel".
 func (ts *TSIntegration) TestFailToCreateAccountEmptyData() {
 	data, err := accountTest.Create(model.DataModel{})
+	ts.ErrorContains(err, "status code 400:")
+	ts.Empty(data)
+}
+
+// It should not create an account without "Data".
+func (ts *TSIntegration) TestFailToCreateAccountEmptyDataData() {
+	data, err := accountTest.Create(model.DataModel{Data: model.Data{}})
 	ts.ErrorContains(err, "status code 400:")
 	ts.Empty(data)
 }
@@ -177,6 +184,7 @@ func (ts *TSIntegration) TestFailToCreateAccountWithoutCorrectID() {
 // It should not create an account without "organizationID"
 func (ts *TSIntegration) TestFailToCreateAccountWithoutOrgID() {
 	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.OrganizationID = ""
 	data, err := accountTest.Create(dataModelTest)
 	ts.ErrorContains(err, "status code 400")
@@ -186,6 +194,7 @@ func (ts *TSIntegration) TestFailToCreateAccountWithoutOrgID() {
 // It should not create an account with an incorrect "organizationID"
 func (ts *TSIntegration) TestFailToCreateAccountWithoutCorrectOrgID() {
 	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.OrganizationID = "ZZZZ-ZZZZZ"
 	data, err := accountTest.Create(dataModelTest)
 	ts.ErrorContains(err, "status code 400")
@@ -193,8 +202,9 @@ func (ts *TSIntegration) TestFailToCreateAccountWithoutCorrectOrgID() {
 }
 
 // It should not create an account without "type"
-func (ts *TSIntegration) TestCreateAccountWithoutType() {
+func (ts *TSIntegration) TestFailCreateAccountWithoutType() {
 	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.Type = ""
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
@@ -202,36 +212,153 @@ func (ts *TSIntegration) TestCreateAccountWithoutType() {
 }
 
 // It should not create an account with an incorrect "type"
-func (ts *TSIntegration) TestFailCreateAccountWithType1() {
+func (ts *TSIntegration) TestFailCreateAccountWithIncorrectType() {
 	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.Type = "AdanJSuarez"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
 }
 
+// It should create an account with any version number
+func (ts *TSIntegration) TestCreateAccountWithAnyVersion() {
+	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Version = 1000000000
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// Attributes ////
+
 // It should not create an account without "attributes".
 func (ts *TSIntegration) TestFailToCreateAccountWithoutAttributes() {
 	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.Attributes = model.Attributes{}
 	data, err := accountTest.Create(dataModelTest)
 	ts.ErrorContains(err, "status code 400")
 	ts.Empty(data)
 }
 
-// It should not create an account without "name" in the attributes.
-func (ts *TSIntegration) TestCreateAccountWithoutName() {
-	dataModelTest = dataModelUK
-	dataModelTest.Data.Attributes.Name = nil
+// It should not create an account with wrong "AccountClassification"
+func (ts *TSIntegration) TestFailCreateAccountWithWrongAccountClassification() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.AccountClassification = "ssss"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
 }
 
-// It should not create an account with empty "name" in the attributes.
-func (ts *TSIntegration) TestCreateAccountWithEmptyName() {
-	dataModelTest = dataModelUK
-	dataModelTest.Data.Attributes.Name = []string{}
+// It should create an account with "AccountClassification"
+func (ts *TSIntegration) TestCreateAccountWithAccountClassification() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.AccountClassification = "Personal"
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should create an account with true "AccountMatchingOptOut"
+func (ts *TSIntegration) TestCreateAccountWithTrueAccountMatching() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.AccountMatchingOptOut = true
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should create an account when "Account Number" is included.
+func (ts *TSIntegration) TestAccountCreateBEWithAccountNumber() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.AccountNumber = "1234567"
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+	ts.NotEmpty(data.Data.Attributes.AccountNumber)
+}
+
+// It should not create an account when "Account Number" is invalid.
+func (ts *TSIntegration) TestFailAccountCreateBEWithWrongAccountNumber() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.AccountNumber = "abcdefg"
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
+
+// It should create an account with an "AlternativeName"
+func (ts *TSIntegration) TestCreateAccountWithAlternativeName() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.AlternativeNames = []string{"Jane Doe the Third"}
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should create an account with an empty "AlternativeName"
+func (ts *TSIntegration) TestCreateAccountWithEmptyAlternativeName() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.AlternativeNames = []string{}
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should create an account with an nil "AlternativeName"
+func (ts *TSIntegration) TestCreateAccountWithNilAlternativeName() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.AlternativeNames = nil
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should create an account with no "BankID"
+func (ts *TSIntegration) TestCreateAccountWithoutBankID() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.BankID = ""
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should not create an account with an incorrect "BankID"
+func (ts *TSIntegration) TestFailCreateAccountWithIncorrectBankID() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.BankID = "sssssss"
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
+
+// It should create an account when "BankIDCode" isn't included
+func (ts *TSIntegration) TestFailCreateAccountBEWithoutBankID() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.BankIDCode = ""
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should not create an account when "BankIDCode" isn't correct
+func (ts *TSIntegration) TestFailCreateAccountBEWithIncorrectBankID() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.BankIDCode = "11111"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
@@ -260,6 +387,7 @@ func (ts *TSIntegration) TestFailCreateAccountWithoutBaseCurrency() {
 // It should not create an account with the invalid base_currency for a EUR country.
 func (ts *TSIntegration) TestFailCreateAccountWithInvalidBaseCurrency() {
 	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.Attributes.BaseCurrency = "333"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
@@ -269,36 +397,8 @@ func (ts *TSIntegration) TestFailCreateAccountWithInvalidBaseCurrency() {
 // It should not create an account with the invalid base_currency for a not EUR country.
 func (ts *TSIntegration) TestFailCreateAccountWithInvalidBaseCurrencyUK() {
 	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.Attributes.BaseCurrency = "333"
-	data, err := accountTest.Create(dataModelTest)
-	ts.Error(err)
-	ts.Empty(data)
-}
-
-// It should create an account
-func (ts *TSIntegration) TestAccountCreateBE() {
-	dataModelTest = dataModelBE
-	dataModelTest.Data.ID = generateAccountUUID()
-	data, err := accountTest.Create(dataModelTest)
-	ts.NoError(err)
-	ts.NotEmpty(data)
-}
-
-// It should create an account with no "BankID"
-func (ts *TSIntegration) TestCreateAccountWithoutBankID() {
-	dataModelTest = dataModelBE
-	dataModelTest.Data.ID = generateAccountUUID()
-	dataModelTest.Data.Attributes.BankID = ""
-	data, err := accountTest.Create(dataModelTest)
-	ts.NoError(err)
-	ts.NotEmpty(data)
-}
-
-// It should not create an account with an incorrect "BankID"
-func (ts *TSIntegration) TestFailCreateAccountWithIncorrectBankID() {
-	dataModelTest = dataModelBE
-	dataModelTest.Data.ID = generateAccountUUID()
-	dataModelTest.Data.Attributes.BankID = "sssssss"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
@@ -317,47 +417,28 @@ func (ts *TSIntegration) TestAccountCreateBEWithBIC() {
 // It should not create an account when the "BIC" doesn't meet the requirements
 func (ts *TSIntegration) TestFailCreateAccountBEWithWrongBIC() {
 	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.Attributes.Bic = "12345"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
 }
 
-// It should create an account when "BankIDCode" isn't included
-func (ts *TSIntegration) TestFailCreateAccountBEWithoutBankID() {
+// It should not create an account without "Country"
+func (ts *TSIntegration) TestFailCreateAccountWithoutCountry() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.ID = generateAccountUUID()
-	dataModelTest.Data.Attributes.BankIDCode = ""
-	data, err := accountTest.Create(dataModelTest)
-	ts.NoError(err)
-	ts.NotEmpty(data)
-}
-
-// It should not create an account when "BankIDCode" isn't correct
-func (ts *TSIntegration) TestFailCreateAccountBEWithIncorrectBankID() {
-	dataModelTest = dataModelBE
-	dataModelTest.Data.Attributes.BankIDCode = "11111"
+	dataModelTest.Data.Attributes.Country = ""
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
 }
 
-// It should create an account when "Account Number" is included.
-func (ts *TSIntegration) TestAccountCreateBEWithAccountNumber() {
+// It should not create an account with wrong "Country" formatted
+func (ts *TSIntegration) TestFailCreateAccountWithWrongCountryFormat() {
 	dataModelTest = dataModelBE
 	dataModelTest.Data.ID = generateAccountUUID()
-	dataModelTest.Data.Attributes.AccountNumber = "1234567"
-	data, err := accountTest.Create(dataModelTest)
-	ts.NoError(err)
-	ts.NotEmpty(data)
-	ts.NotEmpty(data.Data.Attributes.AccountNumber)
-}
-
-// It should not create an account when "Account Number" is invalid.
-func (ts *TSIntegration) TestFailAccountCreateBEWithWrongAccountNumber() {
-	dataModelTest = dataModelBE
-	dataModelTest.Data.ID = generateAccountUUID()
-	dataModelTest.Data.Attributes.AccountNumber = "abcdefg"
+	dataModelTest.Data.Attributes.Country = "xxxx"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
@@ -377,10 +458,107 @@ func (ts *TSIntegration) TestAccountCreateBEWithIBAN() {
 // It should not create an account when "IBAN" is not correct.
 func (ts *TSIntegration) TestFailAccountCreateBEWithIncorrectIBAN() {
 	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
 	dataModelTest.Data.Attributes.Iban = "AABB00000000"
 	data, err := accountTest.Create(dataModelTest)
 	ts.Error(err)
 	ts.Empty(data)
+}
+
+// It should create an account with true "JoinAccount"
+func (ts *TSIntegration) TestCreateAccountJoinAccountTrue() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.JointAccount = true
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should not create an account without "name" in the attributes.
+func (ts *TSIntegration) TestCreateAccountWithoutName() {
+	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.Name = nil
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
+
+// It should not create an account with empty "name" in the attributes.
+func (ts *TSIntegration) TestCreateAccountWithEmptyName() {
+	dataModelTest = dataModelUK
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.Name = []string{}
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
+
+// It should create an account with "SecondaryIdentification"
+func (ts *TSIntegration) TestCreateAccountWithSecondaryIdentification() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.SecondaryIdentification = "xxxxxx"
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should not create an account with wrong "Status"
+func (ts *TSIntegration) TestFailCreateAccountWithWrongStatus() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.Status = "xxxx"
+	data, err := accountTest.Create(dataModelTest)
+	ts.Error(err)
+	ts.Empty(data)
+}
+
+// It should create an account with "pending" "Status"
+func (ts *TSIntegration) TestCreateAccountWithStatus() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.Status = "pending"
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should create an account with "Switched"
+func (ts *TSIntegration) TestCreateAccountWithSwitched() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	dataModelTest.Data.Attributes.Switched = true
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should create an account
+func (ts *TSIntegration) TestAccountCreateBE() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	data, err := accountTest.Create(dataModelTest)
+	ts.NoError(err)
+	ts.NotEmpty(data)
+}
+
+// It should create more than one account
+func (ts *TSIntegration) TestAccountsCreateBE() {
+	dataModelTest = dataModelBE
+	dataModelTest.Data.ID = generateAccountUUID()
+	data1, err1 := accountTest.Create(dataModelTest)
+	ts.NoError(err1)
+	ts.NotEmpty(data1)
+	dataModelTest.Data.ID = generateAccountUUID()
+	data2, err2 := accountTest.Create(dataModelTest)
+	ts.NoError(err2)
+	ts.NotEmpty(data2)
+	dataModelTest.Data.ID = generateAccountUUID()
+	data3, err3 := accountTest.Create(dataModelTest)
+	ts.NoError(err3)
+	ts.NotEmpty(data3)
 }
 
 // It should fetch an existing account
