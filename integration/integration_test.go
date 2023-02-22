@@ -2,7 +2,6 @@ package integration
 
 import (
 	"log"
-	"net/http"
 	"testing"
 	"time"
 
@@ -65,32 +64,6 @@ type TSIntegration struct{ suite.Suite }
 
 func TestRunTSIntegration(t *testing.T) {
 	suite.Run(t, new(TSIntegration))
-}
-
-func (ts *TSIntegration) SetupSuite() {
-	ts.startHealthCheck()
-}
-
-func (ts *TSIntegration) startHealthCheck() {
-	for idx := 0; idx < healthCheckNumOfTries; idx++ {
-		log.Printf("Starting health-check num. %d", idx+1)
-		if ts.getHealthCheck() {
-			log.Printf("Health-check num. %d success", idx+1)
-			return
-		}
-	}
-	log.Fatal("==> Server not ready. Integration tests cannot run! <==")
-}
-
-func (ts *TSIntegration) getHealthCheck() bool {
-	stringConnection := baseAPIURL + "/v1/health"
-	_, err := http.Get(stringConnection)
-	if err != nil {
-		log.Printf("Error during health-check: %v", err)
-		time.Sleep(healthCheckInterval)
-		return false
-	}
-	return true
 }
 
 func (ts *TSIntegration) BeforeTest(_, _ string) {

@@ -46,6 +46,7 @@ services:
     build: .
     depends_on:
       - accountapi
+    restart: on-failure
     environment:
       - BASE_URL=http://accountapi:8080
       - ACCOUNT_PATH=/v1/organisation/accounts

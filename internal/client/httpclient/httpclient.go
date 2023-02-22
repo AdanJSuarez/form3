@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	defaultTimeout           = 10 * time.Second
+	defaultTimeout           = 30 * time.Second
 	exponentialBase          = 1.5
 	maxRetries       float64 = 3
 	maxJitter                = 10
