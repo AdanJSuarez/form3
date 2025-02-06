@@ -1,10 +1,4 @@
-# Form3 Homework
-
-Name: Adan Jesus Suarez Garcia
-
-Form3 homework.
-
-Ref: https://github.com/form3tech-oss/interview-accountapi
+# Form3 API Client
 
 ## Client library
 
